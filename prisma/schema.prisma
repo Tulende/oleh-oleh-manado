@@ -1,0 +1,211 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// -------------------------------------------------------------
+// 1. MANAJEMEN USER & CRM
+// -------------------------------------------------------------
+
+model User {
+  id            String           @id @default(uuid())
+  email         String           @unique
+  passwordHash  String           @default("$2a$10$defaultPasswordHashSulut2026")
+  name          String
+  phone         String?
+  role          String           @default("CUSTOMER") // CUSTOMER, ADMIN, UMKM_SELLER
+  
+  // Metrik Segmentasi CRM (NEW_CUSTOMER, LOYAL, CHURN_RISK, POTENTIAL_LOYAL)
+  crmSegment    String           @default("NEW_CUSTOMER")
+  totalSpent    Float            @default(0)
+  orderCount    Int              @default(0)
+  lastOrderAt   DateTime?
+  
+  // Relasi
+  orders        Order[]
+  reviews       Review[]
+  promoUsages   PromotionUsage[]
+  inventoryLogs InventoryLog[]
+  
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+}
+
+// -------------------------------------------------------------
+// 2. MODUL INVENTORY & PRODUK UMKM KULINER SULUT
+// -------------------------------------------------------------
+
+model Product {
+  id                  String         @id @default(uuid())
+  sku                 String         @unique
+  name                String
+  slug                String         @unique
+  description         String
+  category            String         // Sambal, Olahan Ikan, Kue Khas, Snack Kering, Bumbu Rempah
+  price               Float
+  stock               Int            @default(0)
+  minStockThreshold   Int            @default(5) // Peringatan Stok Menipis
+  weightInGrams       Int            @default(500)
+  
+  // Fitur Kuliner Khas Sulut
+  isPerishable        Boolean        @default(false)
+  shelfLifeDays       Int            @default(7)
+  allowedPackaging    String         @default("STANDARD") // STANDARD, VACUUM_SEALED, FROZEN_CHILLED
+  vacuumExtraFee      Float          @default(0) // Biaya kemasan vacuum (mis: Rp 5.000)
+  imageUrl            String?
+
+  // Relasi
+  orderItems          OrderItem[]
+  inventoryLogs       InventoryLog[]
+  reviews             Review[]
+  
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+}
+
+model InventoryLog {
+  id              String       @id @default(uuid())
+  productId       String
+  product         Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
+  type            String       // IN_PURCHASE, OUT_SETTLEMENT, CANCEL_RESTOCK, ADJUSTMENT_DAMAGE, ADJUSTMENT_AUDIT
+  quantityChange  Int          // Positif (+) atau Negatif (-)
+  stockBefore     Int
+  stockAfter      Int
+  orderId         String?      // Terhubung saat settlement Midtrans
+  order           Order?       @relation(fields: [orderId], references: [id])
+  reason          String       // Audit log catatan alasan pergerakan stok
+  actorId         String?
+  actor           User?        @relation(fields: [actorId], references: [id])
+  
+  createdAt       DateTime     @default(now())
+}
+
+// -------------------------------------------------------------
+// 3. MODUL PROMOSI & ANALYTICS
+// -------------------------------------------------------------
+
+model Promotion {
+  id                    String           @id @default(uuid())
+  code                  String           @unique
+  name                  String
+  description           String?
+  type                  String           // PERCENTAGE_DISCOUNT, FIXED_DISCOUNT, FREE_SHIPPING, FLASH_SALE
+  value                 Float            // Nilai diskon (% atau Rp)
+  maxDiscountAmount     Float?           // Plafon diskon jika persentase
+  minOrderAmount        Float            @default(0)
+  
+  // Validasi & Limit Server-side
+  totalQuota            Int              @default(100)
+  usedQuota             Int              @default(0)
+  limitPerUser          Int              @default(1)
+  startDate             DateTime
+  endDate               DateTime
+  isActive              Boolean          @default(true)
+  
+  // Target Segmen CRM (NULL = Semua Segmen, atau "NEW_CUSTOMER", "LOYAL", "CHURN_RISK")
+  targetSegment         String?
+  
+  // Analytics Tracking
+  totalRevenueGenerated Float            @default(0)
+  totalDiscountGiven    Float            @default(0)
+
+  // Relasi
+  orders                Order[]
+  usages                PromotionUsage[]
+
+  createdAt             DateTime         @default(now())
+  updatedAt             DateTime         @updatedAt
+}
+
+model PromotionUsage {
+  id              String       @id @default(uuid())
+  promotionId     String
+  promotion       Promotion    @relation(fields: [promotionId], references: [id], onDelete: Cascade)
+  userId          String
+  user            User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orderId         String
+  order           Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  discountApplied Float
+
+  createdAt       DateTime     @default(now())
+
+  @@unique([promotionId, userId, orderId])
+}
+
+// -------------------------------------------------------------
+// 4. MODUL ORDER, CHECKOUT & MIDTRANS TRANSACTION
+// -------------------------------------------------------------
+
+model Order {
+  id                    String           @id @default(uuid())
+  invoiceNumber         String           @unique
+  userId                String
+  user                  User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Rincian Biaya
+  itemsTotal            Float
+  shippingFee           Float
+  packagingFee          Float            @default(0) // Biaya vacuum / ice gel
+  discountTotal         Float            @default(0)
+  grandTotal            Float
+  
+  // Relasi Promo
+  promotionId           String?
+  promotion             Promotion?       @relation(fields: [promotionId], references: [id])
+  
+  // Status Order: PENDING_PAYMENT, SETTLEMENT, PROCESSING, SHIPPED, DELIVERED, CANCELLED, EXPIRED
+  status                String           @default("PENDING_PAYMENT")
+  courierName           String           // e.g. "JNE - REG", "POS Kilat Khusus", "Kurir Lokal Manado"
+  trackingNumber        String?
+  shippingAddress       String
+  shippingCity          String
+  postalCode            String
+  
+  // Midtrans Payment Gateway Details
+  snapToken             String?
+  midtransTransactionId String?
+  paymentType           String?          // gopay, qris, bank_transfer, echannnel
+  paidAt                DateTime?
+
+  // Relasi
+  items                 OrderItem[]
+  inventoryLogs         InventoryLog[]
+  promoUsages           PromotionUsage[]
+
+  createdAt             DateTime         @default(now())
+  updatedAt             DateTime         @updatedAt
+}
+
+model OrderItem {
+  id              String       @id @default(uuid())
+  orderId         String
+  order           Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId       String
+  product         Product      @relation(fields: [productId], references: [id])
+  quantity        Int
+  unitPrice       Float
+  packagingChoice String       @default("STANDARD") // STANDARD, VACUUM_SEALED, FROZEN_CHILLED
+  subtotal        Float
+}
+
+// -------------------------------------------------------------
+// 5. SISTEM ULASAN VISUAL (RATING & FOTO)
+// -------------------------------------------------------------
+
+model Review {
+  id          String       @id @default(uuid())
+  productId   String
+  product     Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rating      Int          // 1-5 bintang
+  comment     String
+  photoUrl    String?      // Foto visual produk/kemasan diterima
+  isVerified  Boolean      @default(true)
+  
+  createdAt   DateTime     @default(now())
+}
