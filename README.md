@@ -73,6 +73,26 @@ Aplikasi telah dilengkapi tab **"Live Scenario Demo"** di antarmuka web untuk me
 ---
 
 ## ☁️ Deployment Cloudflare & GitHub Workflow
-* **DNS & SSL Proxied:** Konfigurasikan domain di Cloudflare dengan mode *Full (Strict)* SSL.
-* **Security Headers:** Telah terkonfigurasi pada `next.config.mjs` (X-Frame-Options, HSTS, CSP, Permissions-Policy).
-* **CI/CD:** File `.github/workflows/deploy.yml` otomatis menjalankan linting, build Next.js, dan Prisma migration setiap kali commit di-push ke branch `main`.
+Proyek Next.js ini menggunakan Cloudflare Workers melalui adapter OpenNext. Jalankan dari root proyek:
+
+```bash
+# Login Wrangler ke akun Cloudflare
+npx --offline=false wrangler login
+
+# Buat D1 dan salin database_id dari hasil perintah ini
+npm run d1:create
+```
+
+Masukkan `database_id` hasil pembuatan D1 ke `wrangler.toml`, menggantikan nilai `PLACEHOLDER_REPLACE_AFTER_D1_CREATE`. Jangan deploy sebelum nilai tersebut diganti. Terapkan skema database dan deploy Worker:
+
+```bash
+npm run d1:migrate:prod
+npm run cf:preview
+npm run cf:deploy
+```
+
+`cf:preview` menjalankan hasil build di lingkungan Workers lokal. `cf:deploy` membangun Next.js melalui OpenNext lalu mengirim Worker ke Cloudflare. Perintah ini mengunduh OpenNext dan Wrangler melalui npm saat dijalankan.
+
+Atur rahasia yang diperlukan di Cloudflare Workers (`MIDTRANS_SERVER_KEY`, `MIDTRANS_CLIENT_KEY`, dan `RAJAONGKIR_API_KEY`) sebelum aplikasi menerima trafik. Atur juga `NEXT_PUBLIC_MIDTRANS_CLIENT_KEY` dan `NEXT_PUBLIC_APP_URL` di konfigurasi Worker. Jangan commit nilai rahasia ke repo.
+
+Security headers dikonfigurasi di `next.config.mjs` (X-Frame-Options, HSTS, Referrer-Policy, dan Permissions-Policy).
