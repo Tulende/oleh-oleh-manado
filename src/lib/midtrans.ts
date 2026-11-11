@@ -94,7 +94,7 @@ export async function createMidtransSnapTransaction(params: {
       };
     }
 
-    const data = await res.json();
+    const data = (await res.json()) as any;
     return {
       token: data.token,
       redirectUrl: data.redirect_url,

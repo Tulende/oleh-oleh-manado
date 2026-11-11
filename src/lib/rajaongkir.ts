@@ -56,7 +56,7 @@ export async function calculateShippingOptions(params: {
     });
 
     if (res.ok) {
-      const data = await res.json();
+      const data = (await res.json()) as any;
       const results = data.rajaongkir?.results?.[0]?.costs || [];
       if (results.length > 0) {
         return results.map((c: any) => ({

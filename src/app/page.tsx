@@ -45,7 +45,7 @@ export default function StorefrontPage() {
 
   useEffect(() => {
     fetch('/api/inventory')
-      .then((res) => res.json())
+      .then((res) => res.json() as Promise<any>)
       .then((data) => {
         if (data.success && data.products) {
           setProducts(data.products);
@@ -107,7 +107,7 @@ export default function StorefrontPage() {
           shippingFee: courierFee,
         }),
       });
-      const data = await res.json();
+      const data = (await res.json()) as any;
       if (data.isValid) {
         setAppliedPromo(data.promotion);
         showToast(`Promo ${data.promotion.code} aktif! Hemat Rp ${data.promotion.discountAmount.toLocaleString('id-ID')}`, '🎉');
@@ -126,7 +126,7 @@ export default function StorefrontPage() {
 
     try {
       // Dapatkan data user demo untuk transaksi
-      const crmRes = await fetch('/api/crm').then((r) => r.json());
+      const crmRes = await fetch('/api/crm').then((r) => r.json() as Promise<any>);
       const buyerUser = crmRes.crm?.topCustomers?.[0];
 
       const res = await fetch('/api/checkout', {
@@ -148,7 +148,7 @@ export default function StorefrontPage() {
         }),
       });
 
-      const data = await res.json();
+      const data = (await res.json()) as any;
       if (!res.ok) {
         showToast(data.error || 'Checkout gagal', '🛑');
         return;
@@ -176,11 +176,11 @@ export default function StorefrontPage() {
               payment_type: 'gopay_qris',
             }),
           });
-          const webhookData = await webhookRes.json();
+          const webhookData = (await webhookRes.json()) as any;
           alert(`✅ PEMBAYARAN BERHASIL!\n\n${webhookData.message}\n\nStok produk telah berkurang di database & riwayat transaksi Anda telah tersimpan.`);
           setCheckoutModalOpen(false);
           // Refresh produk
-          const refreshed = await fetch('/api/inventory').then((r) => r.json());
+          const refreshed = await fetch('/api/inventory').then((r) => r.json() as Promise<any>);
           if (refreshed.success) setProducts(refreshed.products);
         }
       }, 600);

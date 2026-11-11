@@ -22,7 +22,7 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
+    const body = (await req.json()) as any;
     const { targetSegment, discountPercent, campaignName } = body;
 
     if (!targetSegment || !discountPercent) {

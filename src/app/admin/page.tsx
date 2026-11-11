@@ -44,8 +44,8 @@ export default function AdminDashboardPage() {
     setLoading(true);
     try {
       const [invRes, crmRes] = await Promise.all([
-        fetch('/api/inventory').then((r) => r.json()),
-        fetch('/api/crm').then((r) => r.json()),
+        fetch('/api/inventory').then((r) => r.json() as Promise<any>),
+        fetch('/api/crm').then((r) => r.json() as Promise<any>),
       ]);
       if (invRes.success) setInventoryData(invRes);
       if (crmRes.success) setCrmData(crmRes);
@@ -69,7 +69,7 @@ export default function AdminDashboardPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ targetSegment: segment, discountPercent: percent }),
       });
-      const data = await res.json();
+      const data = (await res.json()) as any;
       if (data.success) {
         showToast(data.message, '🚀');
         addDemoLog(`[BERHASIL] Voucher ${data.promo.code} aktif dan didistribusikan ke ${data.targetedUserCount} pelanggan.`);
@@ -102,7 +102,7 @@ export default function AdminDashboardPage() {
         }),
       });
 
-      const data = await res.json();
+      const data = (await res.json()) as any;
 
       if (!res.ok) {
         showToast(data.error || 'Checkout ditolak server', '🛑');
@@ -142,7 +142,7 @@ export default function AdminDashboardPage() {
         }),
       });
 
-      const data = await res.json();
+      const data = (await res.json()) as any;
       showToast(data.message, '✅');
       addDemoLog(`[WEBHOOK SUCCESS] Pembayaran lunas diterima! Stok di database dipotong atomik & log mutasi dicatat.`);
       await fetchData();

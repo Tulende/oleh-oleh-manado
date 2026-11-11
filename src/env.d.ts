@@ -1,3 +1,5 @@
+/// <reference types="@cloudflare/workers-types" />
+
 // Cloudflare Workers / Pages environment bindings
 // Auto-loaded by TypeScript via tsconfig references
 

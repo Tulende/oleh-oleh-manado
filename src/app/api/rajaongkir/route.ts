@@ -3,7 +3,7 @@ import { calculateShippingOptions } from '@/lib/rajaongkir';
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
+    const body = (await req.json()) as any;
     const { destinationCityId, weightInGrams, courier } = body;
 
     const options = await calculateShippingOptions({
