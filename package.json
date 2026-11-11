@@ -17,7 +17,8 @@
     "d1:migrate:prod": "npx --offline=false wrangler d1 execute oleh-oleh-db --remote --file=./prisma/d1_schema.sql",
     "cf:build": "npx --offline=false --yes --package=@opennextjs/cloudflare@1.10.0 --package=wrangler@4.38.0 opennextjs-cloudflare build",
     "cf:preview": "npx --offline=false --yes --package=@opennextjs/cloudflare@1.10.0 --package=wrangler@4.38.0 opennextjs-cloudflare build && npx --offline=false --yes --package=@opennextjs/cloudflare@1.10.0 --package=wrangler@4.38.0 opennextjs-cloudflare preview",
-    "cf:deploy": "npx --offline=false --yes --package=@opennextjs/cloudflare@1.10.0 --package=wrangler@4.38.0 opennextjs-cloudflare build && npx --offline=false --yes --package=@opennextjs/cloudflare@1.10.0 --package=wrangler@4.38.0 opennextjs-cloudflare deploy"
+    "cf:deploy": "npx --offline=false --yes --package=@opennextjs/cloudflare@1.10.0 --package=wrangler@4.38.0 opennextjs-cloudflare deploy",
+    "deploy": "npm run cf:build && npm run cf:deploy"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

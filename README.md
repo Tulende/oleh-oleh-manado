@@ -83,15 +83,15 @@ npx --offline=false wrangler login
 npm run d1:create
 ```
 
-Masukkan `database_id` hasil pembuatan D1 ke `wrangler.toml`, menggantikan nilai `PLACEHOLDER_REPLACE_AFTER_D1_CREATE`. Jangan deploy sebelum nilai tersebut diganti. Terapkan skema database dan deploy Worker:
+Masukkan `database_id` hasil pembuatan D1 ke `wrangler.toml`, menggantikan nilai `PLACEHOLDER_REPLACE_AFTER_D1_CREATE`. Jangan deploy sebelum nilai tersebut diganti. Terapkan skema database:
 
 ```bash
 npm run d1:migrate:prod
-npm run cf:preview
-npm run cf:deploy
 ```
 
-`cf:preview` menjalankan hasil build di lingkungan Workers lokal. `cf:deploy` membangun Next.js melalui OpenNext lalu mengirim Worker ke Cloudflare. Perintah ini mengunduh OpenNext dan Wrangler melalui npm saat dijalankan.
+Di Cloudflare Workers Builds, atur **Build command** ke `npm run cf:build` dan **Deploy command** ke `npm run cf:deploy`. Error `.open-next/worker.js was not found` muncul jika build command hanya `npm run build` atau deploy command langsung `npx wrangler deploy`, karena langkah itu melewati adapter OpenNext.
+
+Untuk preview lokal jalankan `npm run cf:preview`; untuk build dan deploy sekaligus dari terminal jalankan `npm run deploy`. Perintah ini mengunduh OpenNext dan Wrangler melalui npm saat dijalankan.
 
 Atur rahasia yang diperlukan di Cloudflare Workers (`MIDTRANS_SERVER_KEY`, `MIDTRANS_CLIENT_KEY`, dan `RAJAONGKIR_API_KEY`) sebelum aplikasi menerima trafik. Atur juga `NEXT_PUBLIC_MIDTRANS_CLIENT_KEY` dan `NEXT_PUBLIC_APP_URL` di konfigurasi Worker. Jangan commit nilai rahasia ke repo.
 
