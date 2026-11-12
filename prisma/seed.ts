@@ -1,9 +1,16 @@
 import { PrismaClient } from '@prisma/client';
+import { hashPassword } from '../src/lib/auth';
 
 const prisma = new PrismaClient();
 
 async function main() {
   console.log('--- Memulai Seeding Database E-Commerce Sentra Kuliner Sulut ---');
+
+  const adminPassword = process.env.ADMIN_INITIAL_PASSWORD;
+  const demoCustomerPassword = process.env.DEMO_CUSTOMER_PASSWORD;
+  if (!adminPassword || adminPassword.length < 12 || !demoCustomerPassword || demoCustomerPassword.length < 8) {
+    throw new Error('Set ADMIN_INITIAL_PASSWORD (min. 12 karakter) dan DEMO_CUSTOMER_PASSWORD (min. 8 karakter) sebelum menjalankan seeder.');
+  }
 
   // Bersihkan data lama jika ada
   await prisma.review.deleteMany();
@@ -24,6 +31,7 @@ async function main() {
       name: 'Administrator Sentra Sulut',
       role: 'ADMIN',
       phone: '0811430001',
+      passwordHash: await hashPassword(adminPassword),
     },
   });
 
@@ -70,6 +78,7 @@ async function main() {
         phone: c.phone,
         role: 'CUSTOMER',
         crmSegment: 'NEW_CUSTOMER',
+        passwordHash: await hashPassword(demoCustomerPassword),
       },
     });
     createdUsers.push({ ...user, city: c.city });

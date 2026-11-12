@@ -96,3 +96,19 @@ Untuk preview lokal jalankan `npm run cf:preview`; untuk build dan deploy sekali
 Atur rahasia yang diperlukan di Cloudflare Workers (`MIDTRANS_SERVER_KEY`, `MIDTRANS_CLIENT_KEY`, dan `RAJAONGKIR_API_KEY`) sebelum aplikasi menerima trafik. Atur juga `NEXT_PUBLIC_MIDTRANS_CLIENT_KEY` dan `NEXT_PUBLIC_APP_URL` di konfigurasi Worker. Jangan commit nilai rahasia ke repo.
 
 Security headers dikonfigurasi di `next.config.mjs` (X-Frame-Options, HSTS, Referrer-Policy, dan Permissions-Policy).
+
+## 🔐 Login Admin & Pembeli
+
+Pembeli dapat mendaftar melalui tombol **Login / Daftar**. Login admin tersedia dari tombol **Admin**; pendaftaran admin publik tidak tersedia. Halaman admin serta endpoint CRM dan perubahan stok memerlukan sesi admin. Checkout dan validasi promo memerlukan sesi pembeli. Sesi menggunakan cookie `HttpOnly` dan password disimpan sebagai hash PBKDF2.
+
+Sebelum login dipakai, atur secret `AUTH_SECRET` (minimal 32 karakter acak) di environment lokal dan Cloudflare Workers. Untuk membuat admin pertama di database D1 yang masih kosong, atur `ADMIN_BOOTSTRAP_TOKEN` sebagai secret kedua, buka `/login?account=admin`, pilih **Buat akun admin**, lalu masukkan token tersebut. Endpoint bootstrap hanya membuat akun admin saat belum ada admin. Setelah akun admin dibuat, hapus secret bootstrap dengan `npx wrangler secret delete ADMIN_BOOTSTRAP_TOKEN`.
+
+Generate nilai acak tanpa menuliskannya ke repo:
+
+```powershell
+node -e "console.log(require('crypto').randomBytes(32).toString('base64url'))"
+```
+
+Jalankan perintah itu dua kali untuk menghasilkan nilai berbeda. Simpan ke `.env.local` untuk development, dan tambahkan melalui **Workers & Pages → Settings → Variables and Secrets** sebagai secret runtime di Cloudflare. Jangan commit nilai secret. Compatibility flag `nodejs_compat_populate_process_env` mengizinkan kode Worker membaca secrets melalui `process.env`.
+
+Seeder development sekarang meminta `ADMIN_INITIAL_PASSWORD` dan `DEMO_CUSTOMER_PASSWORD` di `.env.local`. Akun demo yang dibuat seeder memakai password tersebut; admin membutuhkan minimal 12 karakter.

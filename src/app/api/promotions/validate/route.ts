@@ -1,12 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PromotionService } from '@/services/promotion.service';
+import { getRequestSession } from '@/lib/auth';
 
 export async function POST(req: NextRequest) {
   try {
-    const body = (await req.json()) as any;
-    const { promoCode, userId, subtotal, shippingFee } = body;
+    const session = await getRequestSession(req);
+    if (!session || session.role !== 'CUSTOMER') {
+      return NextResponse.json({ isValid: false, error: 'Silakan login sebagai pembeli untuk menggunakan promo.' }, { status: 401 });
+    }
 
-    if (!promoCode || !userId) {
+    const body = (await req.json()) as any;
+    const { promoCode, subtotal, shippingFee } = body;
+
+    if (!promoCode) {
       return NextResponse.json(
         { isValid: false, error: 'Kode promo dan data user wajib diisi' },
         { status: 400 }
@@ -15,7 +21,7 @@ export async function POST(req: NextRequest) {
 
     const result = await PromotionService.validatePromoCode({
       promoCode,
-      userId,
+      userId: session.id,
       subtotal: Number(subtotal) || 0,
       shippingFee: Number(shippingFee) || 0,
     });

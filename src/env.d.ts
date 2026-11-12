@@ -10,6 +10,8 @@ interface Env {
   RAJAONGKIR_API_KEY: string;
   NEXT_PUBLIC_MIDTRANS_CLIENT_KEY: string;
   NEXT_PUBLIC_APP_URL: string;
+  AUTH_SECRET: string;
+  ADMIN_BOOTSTRAP_TOKEN: string;
 }
 
 declare namespace NodeJS {
@@ -19,6 +21,8 @@ declare namespace NodeJS {
     MIDTRANS_CLIENT_KEY: string;
     NEXT_PUBLIC_MIDTRANS_CLIENT_KEY: string;
     RAJAONGKIR_API_KEY: string;
+    AUTH_SECRET: string;
+    ADMIN_BOOTSTRAP_TOKEN: string;
     NEXT_PUBLIC_APP_URL: string;
     NODE_ENV: 'development' | 'production' | 'test';
   }

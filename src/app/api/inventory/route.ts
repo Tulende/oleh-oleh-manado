@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { InventoryService } from '@/services/inventory.service';
+import { getRequestSession } from '@/lib/auth';
 
 export async function GET() {
   try {
@@ -15,6 +16,11 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   try {
+    const session = await getRequestSession(req);
+    if (session?.role !== 'ADMIN') {
+      return NextResponse.json({ success: false, error: 'Akses admin diperlukan.' }, { status: 403 });
+    }
+
     const body = (await req.json()) as any;
     const { productId, quantityChange, type, reason, actorId } = body;
 

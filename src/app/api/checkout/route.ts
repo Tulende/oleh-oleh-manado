@@ -3,12 +3,17 @@ import prisma from '@/lib/prisma';
 import { InventoryService } from '@/services/inventory.service';
 import { PromotionService } from '@/services/promotion.service';
 import { createMidtransSnapTransaction } from '@/lib/midtrans';
+import { getRequestSession } from '@/lib/auth';
 
 export async function POST(req: NextRequest) {
   try {
+    const session = await getRequestSession(req);
+    if (!session || session.role !== 'CUSTOMER') {
+      return NextResponse.json({ success: false, error: 'Silakan login sebagai pembeli untuk checkout.' }, { status: 401 });
+    }
+
     const body = (await req.json()) as any;
     const {
-      userId,
       items,
       shippingCity,
       shippingAddress,
@@ -17,7 +22,7 @@ export async function POST(req: NextRequest) {
       promoCode,
     } = body;
 
-    if (!userId || !items || items.length === 0) {
+    if (!items || items.length === 0) {
       return NextResponse.json(
         { success: false, error: 'Data pesanan tidak lengkap' },
         { status: 400 }
@@ -33,7 +38,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const user = await prisma.user.findUnique({ where: { id: userId } });
+    const user = await prisma.user.findUnique({ where: { id: session.id } });
     if (!user) {
       return NextResponse.json(
         { success: false, error: 'User tidak ditemukan' },

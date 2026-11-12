@@ -211,6 +211,15 @@ export default function AdminDashboardPage() {
               <span>Live Scenario Assessment</span>
             </button>
           </div>
+          <button
+            onClick={async () => {
+              await fetch('/api/auth/logout', { method: 'POST' });
+              window.location.assign('/login?account=admin');
+            }}
+            className="rounded-lg border border-stone-700 px-3 py-2 text-xs font-semibold text-stone-300 hover:border-orange-500 hover:text-white"
+          >
+            Keluar
+          </button>
         </div>
       </header>
 

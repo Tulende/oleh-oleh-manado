@@ -37,6 +37,7 @@ export default function StorefrontPage() {
   const [appliedPromo, setAppliedPromo] = useState<any>(null);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [toast, setToast] = useState<{ msg: string; icon: string } | null>(null);
+  const [buyer, setBuyer] = useState<{ id: string; name: string; role: string } | null>(null);
 
   const showToast = (msg: string, icon = 'ℹ️') => {
     setToast({ msg, icon });
@@ -44,6 +45,11 @@ export default function StorefrontPage() {
   };
 
   useEffect(() => {
+    fetch('/api/auth/me')
+      .then((response) => response.json() as Promise<any>)
+      .then((data) => setBuyer(data.user?.role === 'CUSTOMER' ? data.user : null))
+      .catch(() => setBuyer(null));
+
     fetch('/api/inventory')
       .then((res) => res.json() as Promise<any>)
       .then((data) => {
@@ -85,12 +91,21 @@ export default function StorefrontPage() {
   });
 
   const handleOpenCheckout = (product: any) => {
+    if (!buyer) {
+      window.location.href = '/login?account=customer&next=%2F';
+      return;
+    }
     setSelectedProduct(product);
     setQty(1);
     setPackagingChoice(product.allowedPackaging === 'VACUUM_SEALED' ? 'VACUUM_SEALED' : 'STANDARD');
     setAppliedPromo(null);
     setPromoCodeInput('MANADOBARU20');
     setCheckoutModalOpen(true);
+  };
+
+  const handleLogout = async () => {
+    await fetch('/api/auth/logout', { method: 'POST' });
+    setBuyer(null);
   };
 
   const handleApplyPromo = async () => {
@@ -102,7 +117,7 @@ export default function StorefrontPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           promoCode: promoCodeInput.trim(),
-          userId: 'dummy-guest-user-sulut', // Diisi otomatis sistem
+          userId: buyer?.id,
           subtotal: sub,
           shippingFee: courierFee,
         }),
@@ -126,14 +141,11 @@ export default function StorefrontPage() {
 
     try {
       // Dapatkan data user demo untuk transaksi
-      const crmRes = await fetch('/api/crm').then((r) => r.json() as Promise<any>);
-      const buyerUser = crmRes.crm?.topCustomers?.[0];
-
       const res = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          userId: buyerUser?.id,
+          userId: buyer?.id,
           items: [
             {
               productId: selectedProduct.id,
@@ -218,7 +230,7 @@ export default function StorefrontPage() {
               <span>CS WhatsApp: 0812-4110-001</span>
             </div>
             <Link
-              href="/admin"
+              href="/login?account=admin"
               className="text-stone-300 hover:text-orange-400 font-medium flex items-center gap-1 transition-colors underline decoration-dotted"
             >
               <Lock className="w-3 h-3" />
@@ -267,12 +279,8 @@ export default function StorefrontPage() {
               <span>Garansi Fresh & Vacuum Sealed</span>
             </div>
 
-            <Link
-              href="/admin"
-              className="bg-stone-900 hover:bg-stone-800 text-white text-xs font-semibold px-4 py-2.5 rounded-full transition-all shadow-sm flex items-center gap-1.5"
-            >
-              <span>Dashboard Admin</span>
-            </Link>
+            {buyer ? <button onClick={handleLogout} className="bg-stone-900 hover:bg-stone-800 text-white text-xs font-semibold px-4 py-2.5 rounded-full transition-all shadow-sm">Keluar ({buyer.name.split(' ')[0]})</button> : <Link href="/login?account=customer" className="bg-stone-900 hover:bg-stone-800 text-white text-xs font-semibold px-4 py-2.5 rounded-full transition-all shadow-sm">Login / Daftar</Link>}
+            <Link href="/login?account=admin" className="hidden sm:inline-flex rounded-full border border-stone-300 px-3 py-2.5 text-xs font-semibold text-stone-700 hover:border-orange-500 hover:text-orange-700">Admin</Link>
           </div>
         </div>
       </header>

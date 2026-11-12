@@ -1,7 +1,7 @@
 name = "oleh-oleh-manado"
 main = ".open-next/worker.js"
 compatibility_date = "2024-09-23"
-compatibility_flags = ["nodejs_compat"]
+compatibility_flags = ["nodejs_compat", "nodejs_compat_populate_process_env"]
 
 # Assets untuk Next.js static files
 assets = { directory = ".open-next/assets", binding = "ASSETS" }
