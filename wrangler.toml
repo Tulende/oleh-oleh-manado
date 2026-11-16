@@ -4,13 +4,13 @@ compatibility_date = "2024-09-23"
 compatibility_flags = ["nodejs_compat", "nodejs_compat_populate_process_env"]
 workers_dev = true
 
+# Assets untuk Next.js static files
+assets = { directory = ".open-next/assets", binding = "ASSETS" }
+
 # Attach the apex domain to this Worker. Cloudflare manages its DNS record and TLS.
 [[routes]]
 pattern = "oleh-oleh.my.id"
 custom_domain = true
-
-# Assets untuk Next.js static files
-assets = { directory = ".open-next/assets", binding = "ASSETS" }
 
 [[d1_databases]]
 binding = "DB"
