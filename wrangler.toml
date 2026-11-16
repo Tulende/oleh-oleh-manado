@@ -19,3 +19,6 @@ database_id = "1caf4cf9-013a-446f-97cf-0de1d21f1f95"
 
 [vars]
 NEXT_PUBLIC_APP_URL = "https://oleh-oleh.my.id"
+
+[ai]
+binding = "AI"

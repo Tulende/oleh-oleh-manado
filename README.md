@@ -97,6 +97,8 @@ Atur rahasia yang diperlukan di Cloudflare Workers (`MIDTRANS_SERVER_KEY`, `MIDT
 
 Domain produksi dikonfigurasi sebagai Custom Domain Worker di `wrangler.toml` (`oleh-oleh.my.id`). Domain harus sudah terdaftar dan zone `oleh-oleh.my.id` harus aktif pada akun Cloudflare yang sama dengan Worker. Setelah prasyarat itu siap, deploy ulang dengan `npm run deploy`; Cloudflare akan menyiapkan DNS dan sertifikat TLS untuk Custom Domain. Jika domain tidak ada di akun Cloudflare yang digunakan oleh Wrangler, tambahkan domain/zone ke akun tersebut atau hubungkan Worker melalui dashboard Cloudflare.
 
+Chat bantuan pelanggan memakai Workers AI lewat binding `AI` di `wrangler.toml`; tidak memerlukan API key di browser. Pastikan Workers AI tersedia di akun Cloudflare. Workers AI menyediakan alokasi gratis harian; pemakaian di atas alokasi bergantung pada paket akun dan dapat dikenai biaya. Pantau penggunaannya di dashboard Workers AI.
+
 Security headers dikonfigurasi di `next.config.mjs` (X-Frame-Options, HSTS, Referrer-Policy, dan Permissions-Policy).
 
 ## 🔐 Login Admin & Pembeli

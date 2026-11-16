@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import CustomerChat from '@/components/customer-chat';
 import {
   ShoppingBag,
   Search,
@@ -751,6 +752,8 @@ export default function StorefrontPage() {
           &copy; {new Date().getFullYear()} Sentra Minahasa • Tugas Akhir Sistem E-Commerce Full-Stack Berbasis Cloudflare & Midtrans.
         </div>
       </footer>
+
+      <CustomerChat />
 
       {/* Floating Toast */}
       {toast && (

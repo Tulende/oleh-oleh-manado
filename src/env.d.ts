@@ -5,6 +5,12 @@
 
 interface Env {
   DB: D1Database;
+  AI: {
+    run: (
+      model: string,
+      input: { messages: Array<{ role: string; content: string }>; max_tokens?: number; temperature?: number }
+    ) => Promise<{ response?: string }>;
+  };
   MIDTRANS_SERVER_KEY: string;
   MIDTRANS_CLIENT_KEY: string;
   RAJAONGKIR_API_KEY: string;
