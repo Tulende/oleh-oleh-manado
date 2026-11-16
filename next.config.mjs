@@ -6,6 +6,11 @@ initOpenNextCloudflareForDev();
 const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  experimental: {
+    // Keep Prisma's generated client and D1 adapter intact for OpenNext's
+    // workerd-specific package resolution instead of bundling Node-only code.
+    serverComponentsExternalPackages: ['@prisma/client', '@prisma/adapter-d1', '.prisma/client'],
+  },
   headers: async () => {
     return [
       {

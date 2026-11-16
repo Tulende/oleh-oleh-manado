@@ -118,37 +118,14 @@ export default function AdminDashboardPage() {
     }
   };
 
-  // Demo: Simulasi Webhook Settlement Midtrans
-  const handleDemoWebhook = async () => {
+  // Endpoint settlement hanya menerima notifikasi bertanda tangan dari Midtrans.
+  const handleDemoWebhook = () => {
     if (!lastInvoice) {
       showToast('Jalankan langkah Checkout terlebih dahulu', '⚠️');
       return;
     }
-
-    addDemoLog(`[WEBHOOK MIDTRANS] Mengirim sinyal konfirmasi pembayaran lunas 'settlement' untuk #${lastInvoice}...`);
-
-    try {
-      const res = await fetch('/api/webhooks/midtrans', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          order_id: lastInvoice,
-          status_code: '200',
-          gross_amount: '150000',
-          signature_key: 'mock_signature_key',
-          transaction_status: 'settlement',
-          fraud_status: 'accept',
-          payment_type: 'gopay_qris',
-        }),
-      });
-
-      const data = (await res.json()) as any;
-      showToast(data.message, '✅');
-      addDemoLog(`[WEBHOOK SUCCESS] Pembayaran lunas diterima! Stok di database dipotong atomik & log mutasi dicatat.`);
-      await fetchData();
-    } catch (err: any) {
-      showToast(err.message, '⚠️');
-    }
+    showToast('Settlement akan diproses otomatis setelah Midtrans mengirim notifikasi pembayaran.', '💳');
+    addDemoLog(`[WEBHOOK MIDTRANS] Menunggu notifikasi bertanda tangan resmi dari Midtrans untuk #${lastInvoice}.`);
   };
 
   return (
@@ -566,13 +543,13 @@ export default function AdminDashboardPage() {
                 <span className="text-[10px] font-bold text-orange-500">SKENARIO 3</span>
                 <h4 className="text-xs font-bold text-white">Webhook Settlement Callback</h4>
                 <p className="text-[11px] text-stone-400">
-                  Simulasikan notifikasi lunas Midtrans. Stok terpotong atomik & log mutasi dicatat di DB.
+                  Setelah pembayaran sandbox berhasil, Midtrans mengirim notifikasi resmi dan stok diperbarui otomatis.
                 </p>
                 <button
                   onClick={handleDemoWebhook}
                   className="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold"
                 >
-                  Kirim Settlement Webhook &rarr;
+                  Info Status Webhook &rarr;
                 </button>
               </div>
 

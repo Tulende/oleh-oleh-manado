@@ -13,7 +13,6 @@ export async function POST(req: NextRequest) {
       order_id,
       status_code,
       gross_amount,
-      signature_key,
       transaction_status,
       fraud_status,
       payment_type,
@@ -22,6 +21,12 @@ export async function POST(req: NextRequest) {
 
     if (!order_id) {
       return NextResponse.json({ error: 'Order ID tidak ditemukan' }, { status: 400 });
+    }
+
+    // Webhook harus berasal dari Midtrans; tidak ada mode development yang menerima signature palsu.
+    if (!verifyMidtransSignature(body)) {
+      console.error(`[Midtrans Webhook Security Alert] Signature tidak valid untuk order ${order_id}`);
+      return NextResponse.json({ error: 'Invalid Signature Key' }, { status: 403 });
     }
 
     // 1. CARI PESANAN DI DATABASE
@@ -35,13 +40,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Order tidak ditemukan' }, { status: 404 });
     }
 
-    // 2. VALIDASI SIGNATURE KEY SHA-512 (Jika signature_key disertakan oleh Midtrans)
-    if (signature_key) {
-      const isValidSignature = verifyMidtransSignature(body);
-      if (!isValidSignature && process.env.NODE_ENV === 'production') {
-        console.error(`[Midtrans Webhook Security Alert] Signature key tidak cocok untuk order ${order_id}`);
-        return NextResponse.json({ error: 'Invalid Signature Key' }, { status: 403 });
-      }
+    if (Math.round(Number(gross_amount)) !== Math.round(order.grandTotal)) {
+      console.error(`[Midtrans Webhook Security Alert] Nilai pembayaran tidak cocok untuk order ${order_id}`);
+      return NextResponse.json({ error: 'Nominal pembayaran tidak cocok' }, { status: 400 });
     }
 
     console.log(`[Midtrans Webhook] Menerima status "${transaction_status}" untuk order #${order.invoiceNumber}`);
@@ -51,6 +52,12 @@ export async function POST(req: NextRequest) {
       transaction_status === 'settlement' ||
       (transaction_status === 'capture' && fraud_status === 'accept')
     ) {
+      if (status_code !== '200') {
+        return NextResponse.json({ error: 'Status pembayaran tidak valid' }, { status: 400 });
+      }
+      if (order.status === 'SETTLEMENT') {
+        return NextResponse.json({ status: 'success', message: 'Notifikasi pembayaran sudah diproses.' });
+      }
       // a. Update status order menjadi SETTLEMENT
       await prisma.order.update({
         where: { id: order.id },

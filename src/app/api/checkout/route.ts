@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { InventoryService } from '@/services/inventory.service';
 import { PromotionService } from '@/services/promotion.service';
-import { createMidtransSnapTransaction } from '@/lib/midtrans';
+import { assertMidtransConfigured, createMidtransSnapTransaction } from '@/lib/midtrans';
 import { getRequestSession } from '@/lib/auth';
 
 export async function POST(req: NextRequest) {
@@ -11,6 +11,9 @@ export async function POST(req: NextRequest) {
     if (!session || session.role !== 'CUSTOMER') {
       return NextResponse.json({ success: false, error: 'Silakan login sebagai pembeli untuk checkout.' }, { status: 401 });
     }
+
+    // Pastikan kredensial tersedia sebelum membuat order yang tidak dapat dibayar.
+    assertMidtransConfigured();
 
     const body = (await req.json()) as any;
     const {
@@ -111,39 +114,42 @@ export async function POST(req: NextRequest) {
     });
 
     // 5. GENERATE TOKEN SNAP MIDTRANS
-    const snapResult = await createMidtransSnapTransaction({
-      orderId: order.invoiceNumber,
-      grossAmount: grandTotal,
-      customerDetails: {
-        firstName: user.name,
-        email: user.email,
-        phone: user.phone || '081234567890',
-      },
-      itemDetails: [
-        ...stockCheck.items.map((it) => ({
-          id: it.productId,
-          price: it.unitPrice + it.vacuumFee,
-          quantity: it.requestedQty,
-          name: `${it.productName}${it.vacuumFee > 0 ? ' [Vacuum]' : ''}`,
-        })),
-        {
-          id: 'SHIPPING_FEE',
-          price: calculatedShipping,
-          quantity: 1,
-          name: `Ongkir (${courierName || 'Ekspedisi'})`,
+    let snapResult: { token: string; redirectUrl: string };
+    try {
+      snapResult = await createMidtransSnapTransaction({
+        orderId: order.invoiceNumber,
+        grossAmount: grandTotal,
+        customerDetails: {
+          firstName: user.name,
+          email: user.email,
+          phone: user.phone || '081234567890',
         },
-        ...(discountTotal > 0
-          ? [
-              {
-                id: 'PROMO_DISCOUNT',
-                price: -discountTotal,
-                quantity: 1,
-                name: `Diskon Voucher Promo`,
-              },
-            ]
-          : []),
-      ],
-    });
+        itemDetails: [
+          ...stockCheck.items.map((it) => ({
+            id: it.productId,
+            price: it.unitPrice + it.vacuumFee,
+            quantity: it.requestedQty,
+            name: `${it.productName}${it.vacuumFee > 0 ? ' [Vacuum]' : ''}`,
+          })),
+          {
+            id: 'SHIPPING_FEE',
+            price: calculatedShipping,
+            quantity: 1,
+            name: `Ongkir (${courierName || 'Ekspedisi'})`,
+          },
+          ...(discountTotal > 0
+            ? [{ id: 'PROMO_DISCOUNT', price: -discountTotal, quantity: 1, name: 'Diskon Voucher Promo' }]
+            : []),
+        ],
+      });
+    } catch (error) {
+      console.error('[Checkout Midtrans Error]:', error);
+      await prisma.order.delete({ where: { id: order.id } });
+      return NextResponse.json(
+        { success: false, error: error instanceof Error ? error.message : 'Gagal menghubungi Midtrans.' },
+        { status: 502 }
+      );
+    }
 
     // Simpan token Snap ke order
     await prisma.order.update({

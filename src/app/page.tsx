@@ -22,6 +22,7 @@ import {
 
 export default function StorefrontPage() {
   const [products, setProducts] = useState<any[]>([]);
+  const [catalogError, setCatalogError] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('Semua');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [checkoutModalOpen, setCheckoutModalOpen] = useState(false);
@@ -51,13 +52,19 @@ export default function StorefrontPage() {
       .catch(() => setBuyer(null));
 
     fetch('/api/inventory')
-      .then((res) => res.json() as Promise<any>)
-      .then((data) => {
-        if (data.success && data.products) {
-          setProducts(data.products);
-        }
+      .then(async (res) => {
+        const data = await res.json() as any;
+        if (!res.ok || !data.success) throw new Error(data.error || 'Gagal memuat katalog produk.');
+        return data;
       })
-      .catch((err) => console.error(err));
+      .then((data) => {
+        setProducts(data.products || []);
+        setCatalogError(null);
+      })
+      .catch((err) => {
+        console.error(err);
+        setCatalogError(err instanceof Error ? err.message : 'Gagal memuat katalog produk.');
+      });
   }, []);
 
   // Update courier fee based on city
@@ -167,35 +174,8 @@ export default function StorefrontPage() {
       }
 
       showToast(`Pesanan berhasil dibuat (#${data.invoiceNumber}). Menyiapkan pembayaran Midtrans...`, '💳');
-      
-      // Buka modal simulasi pembayaran lunas Midtrans
-      setTimeout(async () => {
-        const confirmPay = window.confirm(
-          `[Midtrans Sandbox Payment Gateway]\n\nInvoice: ${data.invoiceNumber}\nTotal: Rp ${data.grandTotal.toLocaleString('id-ID')}\nSnap Token: ${data.snapToken}\n\nKlik "OK" untuk konfirmasi simulasi pembayaran 'SETTLEMENT' (Lunas) agar stok terpotong di database!`
-        );
-
-        if (confirmPay) {
-          const webhookRes = await fetch('/api/webhooks/midtrans', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              order_id: data.invoiceNumber,
-              status_code: '200',
-              gross_amount: data.grandTotal.toString(),
-              signature_key: 'mock_signature_sandbox',
-              transaction_status: 'settlement',
-              fraud_status: 'accept',
-              payment_type: 'gopay_qris',
-            }),
-          });
-          const webhookData = (await webhookRes.json()) as any;
-          alert(`✅ PEMBAYARAN BERHASIL!\n\n${webhookData.message}\n\nStok produk telah berkurang di database & riwayat transaksi Anda telah tersimpan.`);
-          setCheckoutModalOpen(false);
-          // Refresh produk
-          const refreshed = await fetch('/api/inventory').then((r) => r.json() as Promise<any>);
-          if (refreshed.success) setProducts(refreshed.products);
-        }
-      }, 600);
+      setCheckoutModalOpen(false);
+      window.location.assign(data.redirectUrl);
 
     } catch (err: any) {
       showToast(err.message, '⚠️');
@@ -386,6 +366,15 @@ export default function StorefrontPage() {
 
         {/* 5. PRODUCT GRID */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 pt-6">
+          {catalogError ? (
+            <p className="col-span-full rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+              Katalog gagal dimuat: {catalogError}
+            </p>
+          ) : filteredProducts.length === 0 ? (
+            <p className="col-span-full rounded-xl border border-stone-200 bg-white p-4 text-sm text-stone-600">
+              Belum ada produk yang cocok. Coba ubah pencarian atau kategori.
+            </p>
+          ) : null}
           {filteredProducts.map((p) => {
             const isLowStock = p.stock <= p.minStockThreshold;
 
@@ -400,6 +389,15 @@ export default function StorefrontPage() {
                     <span className="text-5xl group-hover:scale-110 transition-transform">
                       {p.category.includes('Ikan') ? '🐟' : p.category.includes('Sambal') ? '🌶️' : p.category.includes('Kue') ? '🥧' : '🥜'}
                     </span>
+                    {p.imageUrl && (
+                      <img
+                        src={p.imageUrl}
+                        alt={p.name}
+                        loading="lazy"
+                        className="absolute inset-0 h-full w-full object-cover"
+                        onError={(event) => { event.currentTarget.style.display = 'none'; }}
+                      />
+                    )}
                     <span className="text-[10px] font-bold text-stone-500 mt-2 tracking-wider uppercase">
                       {p.category}
                     </span>
