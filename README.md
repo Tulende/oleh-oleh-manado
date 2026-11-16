@@ -95,6 +95,8 @@ Untuk preview lokal jalankan `npm run cf:preview`; untuk build dan deploy sekali
 
 Atur rahasia yang diperlukan di Cloudflare Workers (`MIDTRANS_SERVER_KEY`, `MIDTRANS_CLIENT_KEY`, dan `RAJAONGKIR_API_KEY`) sebelum aplikasi menerima trafik. Atur juga `NEXT_PUBLIC_MIDTRANS_CLIENT_KEY` dan `NEXT_PUBLIC_APP_URL` di konfigurasi Worker. Jangan commit nilai rahasia ke repo.
 
+Domain produksi dikonfigurasi sebagai Custom Domain Worker di `wrangler.toml` (`oleh-oleh.my.id`). Domain harus sudah terdaftar dan zone `oleh-oleh.my.id` harus aktif pada akun Cloudflare yang sama dengan Worker. Setelah prasyarat itu siap, deploy ulang dengan `npm run deploy`; Cloudflare akan menyiapkan DNS dan sertifikat TLS untuk Custom Domain. Jika domain tidak ada di akun Cloudflare yang digunakan oleh Wrangler, tambahkan domain/zone ke akun tersebut atau hubungkan Worker melalui dashboard Cloudflare.
+
 Security headers dikonfigurasi di `next.config.mjs` (X-Frame-Options, HSTS, Referrer-Policy, dan Permissions-Policy).
 
 ## 🔐 Login Admin & Pembeli
