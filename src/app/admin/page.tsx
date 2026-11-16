@@ -191,7 +191,7 @@ export default function AdminDashboardPage() {
           <button
             onClick={async () => {
               await fetch('/api/auth/logout', { method: 'POST' });
-              window.location.assign('/login?account=admin');
+              window.location.assign('/admin/login');
             }}
             className="rounded-lg border border-stone-700 px-3 py-2 text-xs font-semibold text-stone-300 hover:border-orange-500 hover:text-white"
           >

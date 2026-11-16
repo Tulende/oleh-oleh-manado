@@ -3,16 +3,25 @@ import { getSessionCookie, readSessionToken } from '@/lib/auth';
 
 export async function middleware(request: NextRequest) {
   const user = await readSessionToken(getSessionCookie(request));
-  const isAdminPage = request.nextUrl.pathname.startsWith('/admin');
+  const pathname = request.nextUrl.pathname;
 
+  const isAdminLogin = pathname === '/admin/login';
+  const isAdminPage = pathname.startsWith('/admin') && !isAdminLogin;
+
+  // Protect /admin routes from unauthenticated or non-admin users
   if (isAdminPage && user?.role !== 'ADMIN') {
-    const loginUrl = new URL('/login', request.url);
-    loginUrl.searchParams.set('account', 'admin');
-    loginUrl.searchParams.set('next', request.nextUrl.pathname);
+    const loginUrl = new URL('/admin/login', request.url);
+    loginUrl.searchParams.set('next', pathname);
     return NextResponse.redirect(loginUrl);
   }
 
-  if (request.nextUrl.pathname === '/login' && user) {
+  // If already logged in as ADMIN, skip admin login and go to /admin
+  if (isAdminLogin && user?.role === 'ADMIN') {
+    return NextResponse.redirect(new URL('/admin', request.url));
+  }
+
+  // If user visits customer login while already authenticated
+  if (pathname === '/login' && user) {
     return NextResponse.redirect(new URL(user.role === 'ADMIN' ? '/admin' : '/', request.url));
   }
 
