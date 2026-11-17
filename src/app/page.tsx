@@ -15,7 +15,6 @@ import {
   CreditCard,
   ChevronRight,
   Sparkles,
-  PhoneCall,
   MapPin,
   Clock,
   ArrowRight,
@@ -356,32 +355,6 @@ export default function StorefrontPage() {
   return (
     <div className="min-h-screen bg-stone-50 text-stone-900 font-sans selection:bg-orange-600 selection:text-white">
       
-      {/* 1. TOP ANNOUNCEMENT BAR */}
-      <div className="bg-stone-900 text-stone-300 text-xs py-2 px-4">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-2">
-          <div className="flex items-center gap-2">
-            <span className="bg-orange-600 text-white font-bold px-2 py-0.5 rounded text-[10px] uppercase tracking-wider">
-              GRATIS ONGKIR
-            </span>
-            <span>Subsidi Ongkir Seluruh Indonesia min. belanja Rp 100.000 (Kode: <strong>ONGKIRGRATIS</strong>)</span>
-          </div>
-
-          <div className="flex items-center gap-4 text-[11px] text-stone-400">
-            <div className="flex items-center gap-1">
-              <PhoneCall className="w-3 h-3 text-orange-500" />
-              <span>CS WhatsApp: 0812-4110-001</span>
-            </div>
-            <Link
-              href="/admin/login"
-              className="text-stone-300 hover:text-orange-400 font-medium flex items-center gap-1 transition-colors underline decoration-dotted"
-            >
-              <Lock className="w-3 h-3" />
-              <span>Portal Admin & UMKM &rarr;</span>
-            </Link>
-          </div>
-        </div>
-      </div>
-
       {/* 2. MAIN NAVBAR */}
       <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-stone-200 shadow-xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
@@ -466,8 +439,8 @@ export default function StorefrontPage() {
 
       {/* 3. HERO SHOWCASE SECTION */}
       <section className="relative overflow-hidden bg-gradient-to-br from-stone-900 via-stone-800 to-orange-950 text-white py-14 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-          <div className="space-y-4">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 items-center">
+          <div className="max-w-3xl space-y-4">
             <div className="inline-flex items-center gap-2 bg-orange-500/20 border border-orange-400/30 text-orange-300 text-xs font-semibold px-3 py-1 rounded-full backdrop-blur-sm">
               <Sparkles className="w-3.5 h-3.5 text-orange-400" />
               <span>Kurasi 100% Produk UMKM Sulawesi Utara</span>
@@ -496,40 +469,6 @@ export default function StorefrontPage() {
             </div>
           </div>
 
-          {/* Hero Feature Banner Cards */}
-          <div className="grid grid-cols-2 gap-3.5">
-            <div className="bg-white/10 backdrop-blur-md border border-white/10 p-4 rounded-2xl space-y-2">
-              <div className="w-9 h-9 rounded-xl bg-orange-500/20 flex items-center justify-center text-orange-400 font-bold">
-                🐟
-              </div>
-              <h3 className="font-bold text-sm">Cakalang Fufu Asap</h3>
-              <p className="text-xs text-stone-300">Asap tradisional sabut kelapa dari pesisir Bitung. Daging tebal & gurih.</p>
-            </div>
-
-            <div className="bg-white/10 backdrop-blur-md border border-white/10 p-4 rounded-2xl space-y-2">
-              <div className="w-9 h-9 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-400 font-bold">
-                🌶️
-              </div>
-              <h3 className="font-bold text-sm">Sambal Roa Judes</h3>
-              <p className="text-xs text-stone-300">Ikan roa asap melimpah, cabai rawit pedas & minyak kelapa khas Manado.</p>
-            </div>
-
-            <div className="bg-white/10 backdrop-blur-md border border-white/10 p-4 rounded-2xl space-y-2">
-              <div className="w-9 h-9 rounded-xl bg-yellow-500/20 flex items-center justify-center text-yellow-400 font-bold">
-                🥥
-              </div>
-              <h3 className="font-bold text-sm">Klappertaart Asli</h3>
-              <p className="text-xs text-stone-300">Custard kelapa muda lembut dengan almond panggang & kayu manis harum.</p>
-            </div>
-
-            <div className="bg-white/10 backdrop-blur-md border border-white/10 p-4 rounded-2xl space-y-2">
-              <div className="w-9 h-9 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-400 font-bold">
-                🛡️
-              </div>
-              <h3 className="font-bold text-sm">Kemasan Vacuum</h3>
-              <p className="text-xs text-stone-300">Segel hampa udara anti-bocor aroma, aman dikirim lewat bagasi pesawat.</p>
-            </div>
-          </div>
         </div>
       </section>
 
