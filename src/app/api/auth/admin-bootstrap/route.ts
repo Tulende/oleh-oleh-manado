@@ -6,7 +6,7 @@ export async function POST(request: NextRequest) {
   try {
     assertAuthConfigured();
     const bootstrapToken = process.env.ADMIN_BOOTSTRAP_TOKEN;
-    if (!bootstrapToken || bootstrapToken.length < 32) {
+    if (!bootstrapToken || bootstrapToken.length < 12) {
       return NextResponse.json({ error: 'Pembuatan admin pertama belum diaktifkan.' }, { status: 404 });
     }
 
