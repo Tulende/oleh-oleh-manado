@@ -56,7 +56,7 @@ export async function verifyPassword(password: string, storedHash: string): Prom
 
 function getSessionSecret(): string {
   const secret = process.env.AUTH_SECRET;
-  if (!secret || secret.length <12) throw new Error('AUTH_SECRET must be configured with at least 32 characters.');
+  if (!secret || secret.length <12) throw new Error('AUTH_SECRET must be configured with at least 12 characters.');
   return secret;
 }
 
