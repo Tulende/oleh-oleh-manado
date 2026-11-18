@@ -228,10 +228,19 @@ export class InventoryService {
   /**
    * 5. MONITORING STOK & DAFTAR LOW-STOCK
    */
-  static async getInventoryOverview() {
-    const products = await prisma.product.findMany({
+  static async getInventoryOverview(categoryFilter?: string) {
+    const allProducts = await prisma.product.findMany({
       orderBy: { stock: 'asc' },
     });
+
+    const isReset = !categoryFilter || categoryFilter === 'Semua' || categoryFilter.trim() === '' || categoryFilter.toLowerCase() === 'semua';
+    const products = isReset
+      ? allProducts
+      : allProducts.filter((p) => {
+          const normProduct = (p.category || '').toLowerCase().replace(/[-_]+/g, ' ').replace(/\s+/g, ' ').trim();
+          const normFilter = categoryFilter.toLowerCase().replace(/[-_]+/g, ' ').replace(/\s+/g, ' ').trim();
+          return normProduct === normFilter || normProduct.replace(/\s+/g, '') === normFilter.replace(/\s+/g, '') || normProduct.includes(normFilter) || normFilter.includes(normProduct);
+        });
 
     const lowStockItems = products.filter((p) => p.stock <= p.minStockThreshold);
 

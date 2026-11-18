@@ -2,9 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { InventoryService } from '@/services/inventory.service';
 import { getRequestSession } from '@/lib/auth';
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
-    const data = await InventoryService.getInventoryOverview();
+    const { searchParams } = new URL(req.url);
+    const category = searchParams.get('category') || undefined;
+    const data = await InventoryService.getInventoryOverview(category);
     return NextResponse.json({ success: true, ...data });
   } catch (error: any) {
     return NextResponse.json(

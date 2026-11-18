@@ -33,13 +33,60 @@ interface CartItem {
 
 function getCategoryEmoji(category?: string) {
   if (!category) return '🛍️';
-  const cat = category.toLowerCase();
+  const cat = category.toLowerCase().replace(/[-_]+/g, ' ');
   if (cat.includes('ikan') || cat.includes('cakalang') || cat.includes('fufu')) return '🐟';
   if (cat.includes('sambal') || cat.includes('roa') || cat.includes('pedas')) return '🌶️';
   if (cat.includes('kue') || cat.includes('klapper')) return '🍰';
   if (cat.includes('snack') || cat.includes('kering') || cat.includes('halua')) return '🥜';
   if (cat.includes('bumbu') || cat.includes('rempah')) return '🌿';
   return '🛍️';
+}
+
+function normalizeCategory(category?: string | null): string {
+  if (!category || typeof category !== 'string') return '';
+  return category
+    .toLowerCase()
+    .replace(/[-_]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function checkCategoryMatch(productCategory?: string | null, selected?: string | null): boolean {
+  if (!selected || selected === 'Semua' || selected.trim() === '' || selected.toLowerCase() === 'semua') {
+    return true;
+  }
+  if (!productCategory || typeof productCategory !== 'string') {
+    return false;
+  }
+
+  const normProduct = normalizeCategory(productCategory);
+  const normSelected = normalizeCategory(selected);
+
+  if (!normSelected || normSelected === 'semua') {
+    return true;
+  }
+
+  // Exact normalized match (e.g. 'olahan ikan' === 'olahan ikan')
+  if (normProduct === normSelected) {
+    return true;
+  }
+
+  // Separator-stripped match (e.g. 'olahanikan' === 'olahanikan')
+  const alphaProduct = normProduct.replace(/\s+/g, '');
+  const alphaSelected = normSelected.replace(/\s+/g, '');
+  if (alphaProduct === alphaSelected) {
+    return true;
+  }
+
+  // Substring match in either direction
+  if (normProduct.includes(normSelected) || normSelected.includes(normProduct)) {
+    return true;
+  }
+  if (alphaProduct.includes(alphaSelected) || alphaSelected.includes(alphaProduct)) {
+    return true;
+  }
+
+  return false;
 }
 
 export default function StorefrontPage() {
@@ -219,8 +266,12 @@ export default function StorefrontPage() {
   ];
 
   const filteredProducts = products.filter((p) => {
-    const matchesCategory = selectedCategory === 'Semua' || p.category.toLowerCase().includes(selectedCategory.toLowerCase());
-    const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.description.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = checkCategoryMatch(p.category, selectedCategory);
+    const query = searchQuery.trim().toLowerCase();
+    const matchesSearch = !query
+      ? true
+      : (p.name && p.name.toLowerCase().includes(query)) ||
+        (p.description && p.description.toLowerCase().includes(query));
     return matchesCategory && matchesSearch;
   });
 
@@ -530,7 +581,7 @@ export default function StorefrontPage() {
                   {/* Product Visual Tag */}
                   <div className="h-44 bg-gradient-to-br from-amber-50 to-orange-100 flex flex-col items-center justify-center p-4 relative border-b border-stone-100">
                     <span className="text-5xl group-hover:scale-110 transition-transform">
-                      {p.category.includes('Ikan') ? '🐟' : p.category.includes('Sambal') ? '🌶️' : p.category.includes('Kue') ? '🥧' : '🥜'}
+                      {getCategoryEmoji(p.category)}
                     </span>
                     {p.imageUrl && (
                       <img
