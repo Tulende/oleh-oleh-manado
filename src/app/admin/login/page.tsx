@@ -85,7 +85,7 @@ export default function AdminLoginPage() {
         <div className="overflow-hidden rounded-3xl border border-stone-800 bg-stone-900/90 backdrop-blur-xl shadow-2xl shadow-black/80">
           
           {/* Card Header */}
-          <div className="border-b border-stone-800/80 bg-gradient-to-b from-stone-800/50 to-stone-900/40 p-7 text-center">
+          <div className="border-b border-stone-800/80 bg-gradient-to-b from-stone-800/50 to-stone-900/40 p-5 sm:p-7 text-center">
             <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-tr from-orange-600 to-amber-600 shadow-lg shadow-orange-600/30 text-white">
               {isBootstrapping ? <KeyRound className="h-7 w-7" /> : <Lock className="h-7 w-7" />}
             </div>
@@ -106,7 +106,7 @@ export default function AdminLoginPage() {
           </div>
 
           {/* Form Body */}
-          <div className="p-7">
+          <div className="p-5 sm:p-7">
             <form onSubmit={handleSubmit} className="space-y-4">
               
               {isBootstrapping && (

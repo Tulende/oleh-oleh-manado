@@ -357,19 +357,19 @@ export default function StorefrontPage() {
       
       {/* 2. MAIN NAVBAR */}
       <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-stone-200 shadow-xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 min-h-16 py-2 sm:h-20 sm:py-0 flex items-center justify-between gap-2 sm:gap-4">
           
           {/* Logo & Brand */}
-          <Link href="/" className="flex items-center gap-3 shrink-0">
-            <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-orange-600 to-amber-500 flex items-center justify-center text-white font-black text-2xl shadow-md">
+          <Link href="/" className="flex min-w-0 items-center gap-2 sm:gap-3 shrink-0">
+            <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-tr from-orange-600 to-amber-500 flex items-center justify-center text-white font-black text-xl sm:text-2xl shadow-md">
               S
             </div>
-            <div>
-              <div className="text-xl font-black tracking-tight text-stone-900 flex items-center gap-1.5">
+            <div className="min-w-0">
+              <div className="text-sm sm:text-xl font-black tracking-tight text-stone-900 flex items-center gap-1.5 whitespace-nowrap">
                 <span>SENTRA MINAHASA</span>
                 <span className="w-2 h-2 rounded-full bg-orange-600"></span>
               </div>
-              <p className="text-[11px] text-stone-500 tracking-wide font-medium">
+              <p className="hidden sm:block text-[11px] text-stone-500 tracking-wide font-medium">
                 Pusat Oleh-Oleh & Kuliner Autentik Sulawesi Utara
               </p>
             </div>
@@ -388,7 +388,7 @@ export default function StorefrontPage() {
           </div>
 
           {/* Quick Header Features */}
-          <div className="flex items-center gap-2.5">
+          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2.5">
             <div className="hidden lg:flex items-center gap-2 text-xs text-stone-600 border-r border-stone-200 pr-3">
               <ShieldCheck className="w-4 h-4 text-emerald-600" />
               <span>Garansi Fresh & Vacuum Sealed</span>
@@ -398,7 +398,7 @@ export default function StorefrontPage() {
             <button
               type="button"
               onClick={() => setCartDrawerOpen(true)}
-              className="relative flex items-center gap-2 bg-stone-100 hover:bg-orange-50 border border-stone-200 hover:border-orange-300 text-stone-800 text-xs font-bold px-3.5 py-2 rounded-full transition-all shadow-2xs group"
+              className="relative flex items-center gap-1.5 sm:gap-2 bg-stone-100 hover:bg-orange-50 border border-stone-200 hover:border-orange-300 text-xs font-bold px-2.5 sm:px-3.5 py-2 rounded-full transition-all shadow-2xs group"
               aria-label="Keranjang Belanja"
             >
               <ShoppingCart className="w-4 h-4 text-orange-600 transition-transform group-hover:scale-110" />
@@ -415,16 +415,18 @@ export default function StorefrontPage() {
             {buyer ? (
               <button
                 onClick={handleLogout}
-                className="bg-stone-900 hover:bg-stone-800 text-white text-xs font-semibold px-4 py-2 rounded-full transition-all shadow-sm"
+                className="bg-stone-900 hover:bg-stone-800 text-white text-xs font-semibold px-3 sm:px-4 py-2 rounded-full transition-all shadow-sm whitespace-nowrap"
               >
-                Keluar ({buyer.name.split(' ')[0]})
+                <span className="sm:hidden">Keluar</span>
+                <span className="hidden sm:inline">Keluar ({buyer.name.split(' ')[0]})</span>
               </button>
             ) : (
               <Link
                 href="/login"
-                className="bg-stone-900 hover:bg-stone-800 text-white text-xs font-semibold px-4 py-2 rounded-full transition-all shadow-sm"
+                className="bg-stone-900 hover:bg-stone-800 text-white text-xs font-semibold px-3 sm:px-4 py-2 rounded-full transition-all shadow-sm whitespace-nowrap"
               >
-                Login / Daftar
+                <span className="sm:hidden">Masuk</span>
+                <span className="hidden sm:inline">Login / Daftar</span>
               </Link>
             )}
             <Link
@@ -438,7 +440,7 @@ export default function StorefrontPage() {
       </header>
 
       {/* 3. HERO SHOWCASE SECTION */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-stone-900 via-stone-800 to-orange-950 text-white py-14 px-4 sm:px-6 lg:px-8">
+      <section className="relative overflow-hidden bg-gradient-to-br from-stone-900 via-stone-800 to-orange-950 text-white py-10 sm:py-14 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto grid grid-cols-1 items-center">
           <div className="max-w-3xl space-y-4">
             <div className="inline-flex items-center gap-2 bg-orange-500/20 border border-orange-400/30 text-orange-300 text-xs font-semibold px-3 py-1 rounded-full backdrop-blur-sm">
@@ -473,15 +475,26 @@ export default function StorefrontPage() {
       </section>
 
       {/* 4. CATEGORY SELECTOR & FILTER */}
-      <section id="katalog" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-4">
+      <section id="katalog" className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-8 sm:pt-10 pb-4">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-stone-200">
           <div>
-            <h2 className="text-2xl font-black tracking-tight text-stone-900">
+            <h2 className="text-xl sm:text-2xl font-black tracking-tight text-stone-900">
               Katalog Kuliner & Oleh-Oleh Khas Sulut
             </h2>
             <p className="text-xs text-stone-500 mt-1">
               Diproduksi higienis langsung oleh pengrajin UMKM Manado, Bitung, Minahasa, dan Tomohon.
             </p>
+            <div className="relative mt-4 md:hidden">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                placeholder="Cari produk oleh-oleh..."
+                aria-label="Cari produk"
+                className="w-full text-sm pl-10 pr-4 py-3 rounded-xl border border-stone-200 bg-white focus:outline-none focus:border-orange-500 shadow-xs"
+              />
+              <Search className="w-4 h-4 text-stone-400 absolute left-3.5 top-3.5" />
+            </div>
           </div>
 
           {/* Category Chips */}
@@ -1141,7 +1154,7 @@ export default function StorefrontPage() {
         <button
           type="button"
           onClick={() => setCartDrawerOpen(true)}
-          className="fixed bottom-6 left-6 z-40 bg-stone-900 hover:bg-orange-600 text-white font-bold text-xs px-4 py-3 rounded-full shadow-2xl flex items-center gap-3 transition-all border border-stone-700 hover:scale-105 active:scale-95 group"
+          className="fixed bottom-4 left-3 right-20 sm:bottom-6 sm:left-6 sm:right-auto z-40 bg-stone-900 hover:bg-orange-600 text-white font-bold text-[11px] sm:text-xs px-4 py-3 rounded-full shadow-2xl flex items-center justify-center sm:justify-start gap-3 transition-all border border-stone-700 hover:scale-105 active:scale-95 group"
           aria-label="Buka Keranjang Belanja"
         >
           <div className="relative">
@@ -1150,7 +1163,7 @@ export default function StorefrontPage() {
               {totalCartCount}
             </span>
           </div>
-          <span>Keranjang: Rp {cartEstimatedTotal.toLocaleString('id-ID')}</span>
+          <span className="truncate">Keranjang: Rp {cartEstimatedTotal.toLocaleString('id-ID')}</span>
           <ChevronRight className="w-3.5 h-3.5 text-stone-400 group-hover:text-white" />
         </button>
       )}
@@ -1205,7 +1218,7 @@ export default function StorefrontPage() {
 
       {/* Floating Toast */}
       {toast && (
-        <div className="fixed bottom-6 right-6 z-50 bg-stone-900 text-white text-xs px-4 py-3 rounded-2xl shadow-xl flex items-center gap-2 border border-stone-700">
+        <div className="fixed bottom-24 left-4 right-4 sm:bottom-6 sm:left-auto sm:right-6 z-50 max-w-lg bg-stone-900 text-white text-xs px-4 py-3 rounded-2xl shadow-xl flex items-start gap-2 border border-stone-700">
           <span>{toast.icon}</span>
           <span>{toast.msg}</span>
         </div>

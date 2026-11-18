@@ -133,44 +133,58 @@ export default function AdminDashboardPage() {
       
       {/* Top Header */}
       <header className="bg-stone-950 border-b border-stone-800 sticky top-0 z-30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link
-              href="/"
-              className="text-stone-400 hover:text-white flex items-center gap-1.5 text-xs font-semibold mr-2 transition-colors"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              <span>Kembali ke Toko</span>
-            </Link>
-            <div className="h-4 w-px bg-stone-700"></div>
-            <div className="flex items-center gap-2">
-              <span className="font-black text-sm tracking-tight text-orange-500">ADMIN SENTRA SULUT</span>
-              <span className="text-[10px] bg-stone-800 text-stone-300 px-2 py-0.5 rounded font-mono">
-                Command Center UMKM
-              </span>
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2 flex flex-col gap-2 2xl:h-16 2xl:flex-row 2xl:items-center 2xl:justify-between 2xl:py-0">
+          <div className="flex min-w-0 items-center justify-between gap-3 2xl:flex-1">
+            <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+              <Link
+                href="/"
+                className="text-stone-400 hover:text-white flex items-center gap-1.5 text-xs font-semibold transition-colors shrink-0"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                <span className="hidden sm:inline">Kembali ke Toko</span>
+              </Link>
+              <div className="hidden sm:block h-4 w-px bg-stone-700"></div>
+              <div className="flex min-w-0 items-center gap-2">
+                <span className="truncate font-black text-xs sm:text-sm tracking-tight text-orange-500">ADMIN SENTRA SULUT</span>
+                <span className="hidden md:inline text-[10px] bg-stone-800 text-stone-300 px-2 py-0.5 rounded font-mono whitespace-nowrap">
+                  Command Center UMKM
+                </span>
             </div>
+
+            <button
+              onClick={async () => {
+                await fetch('/api/auth/logout', { method: 'POST' });
+                window.location.assign('/admin/login');
+              }}
+              className="shrink-0 rounded-lg border border-stone-700 px-3 py-2 text-xs font-semibold text-stone-300 hover:border-orange-500 hover:text-white"
+            >
+              Keluar
+            </button>
           </div>
 
           {/* Tab Navigation */}
-          <div className="flex items-center gap-1 bg-stone-900 p-1 rounded-xl border border-stone-800 text-xs">
+          <nav aria-label="Navigasi admin" className="w-full max-w-full overflow-x-auto 2xl:w-auto 2xl:shrink-0">
+            <div className="flex w-max min-w-full items-center gap-1 bg-stone-900 p-1 rounded-xl border border-stone-800 text-xs 2xl:min-w-0">
             <button
               onClick={() => setActiveTab('crm')}
-              className={`px-3 py-1.5 rounded-lg font-semibold transition-all flex items-center gap-1.5 ${
+              className={`shrink-0 px-2.5 sm:px-3 py-1.5 rounded-lg font-semibold transition-all flex items-center gap-1.5 whitespace-nowrap ${
                 activeTab === 'crm' ? 'bg-orange-600 text-white shadow-xs' : 'text-stone-400 hover:text-white'
               }`}
             >
               <Users className="w-3.5 h-3.5" />
-              <span>CRM & Retensi</span>
+              <span className="hidden sm:inline">CRM & Retensi</span>
+              <span className="sm:hidden">CRM</span>
             </button>
 
             <button
               onClick={() => setActiveTab('inventory')}
-              className={`px-3 py-1.5 rounded-lg font-semibold transition-all flex items-center gap-1.5 ${
+              className={`shrink-0 px-2.5 sm:px-3 py-1.5 rounded-lg font-semibold transition-all flex items-center gap-1.5 whitespace-nowrap ${
                 activeTab === 'inventory' ? 'bg-orange-600 text-white shadow-xs' : 'text-stone-400 hover:text-white'
               }`}
             >
               <Package className="w-3.5 h-3.5" />
-              <span>Inventori & Stok</span>
+              <span className="hidden sm:inline">Inventori & Stok</span>
+              <span className="sm:hidden">Stok</span>
               {inventoryData?.lowStockCount > 0 && (
                 <span className="bg-red-500 text-white text-[9px] px-1.5 py-0.2 rounded-full font-bold">
                   {inventoryData.lowStockCount}
@@ -180,37 +194,30 @@ export default function AdminDashboardPage() {
 
             <button
               onClick={() => setActiveTab('demo')}
-              className={`px-3 py-1.5 rounded-lg font-semibold transition-all flex items-center gap-1.5 ${
+              className={`shrink-0 px-2.5 sm:px-3 py-1.5 rounded-lg font-semibold transition-all flex items-center gap-1.5 whitespace-nowrap ${
                 activeTab === 'demo' ? 'bg-indigo-600 text-white shadow-xs' : 'text-stone-400 hover:text-white'
               }`}
             >
               <Flame className="w-3.5 h-3.5 text-amber-300" />
-              <span>Live Scenario Assessment</span>
+              <span className="hidden sm:inline">Live Scenario Assessment</span>
+              <span className="sm:hidden">Demo</span>
             </button>
-          </div>
-          <button
-            onClick={async () => {
-              await fetch('/api/auth/logout', { method: 'POST' });
-              window.location.assign('/admin/login');
-            }}
-            className="rounded-lg border border-stone-700 px-3 py-2 text-xs font-semibold text-stone-300 hover:border-orange-500 hover:text-white"
-          >
-            Keluar
-          </button>
+            </div>
+          </nav>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+      <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-5 sm:py-8 space-y-5 sm:space-y-6">
 
         {/* TAB 1: CRM & CUSTOMER RETENTION */}
         {activeTab === 'crm' && (
           <div className="space-y-6">
             <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 pb-3 border-b border-stone-800">
               <div>
-                <h1 className="text-xl font-bold text-white flex items-center gap-2">
+                <h1 className="text-lg sm:text-xl font-bold text-white flex flex-wrap items-center gap-2">
                   <Users className="w-5 h-5 text-indigo-400" />
-                  <span>Modul CRM & Customer Retention (Bobot 10%)</span>
+                  <span className="min-w-0 break-words">Modul CRM & Customer Retention (Bobot 10%)</span>
                 </h1>
                 <p className="text-xs text-stone-400">
                   Perhitungan segmentasi RFM otomatis, rasio repeat purchase, dan aksi retensi voucher khusus.
@@ -303,13 +310,13 @@ export default function AdminDashboardPage() {
             </div>
 
             {/* Customer List Table */}
-            <div className="bg-stone-950 border border-stone-800 rounded-2xl p-5 space-y-3">
+            <div className="bg-stone-950 border border-stone-800 rounded-2xl p-3 sm:p-5 space-y-3">
               <h3 className="text-xs font-bold uppercase tracking-wider text-stone-300">
                 Data Profil Pelanggan & Riwayat Transaksi (Database Live)
               </h3>
 
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs border-collapse">
+                <table className="w-full min-w-[720px] text-left text-xs border-collapse">
                   <thead>
                     <tr className="border-b border-stone-800 text-stone-400">
                       <th className="py-2 px-3">Nama</th>
@@ -359,9 +366,9 @@ export default function AdminDashboardPage() {
           <div className="space-y-6">
             <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 pb-3 border-b border-stone-800">
               <div>
-                <h1 className="text-xl font-bold text-white flex items-center gap-2">
+                <h1 className="text-lg sm:text-xl font-bold text-white flex flex-wrap items-center gap-2">
                   <Package className="w-5 h-5 text-orange-500" />
-                  <span>Modul Inventori & Audit Log Pergerakan Stok (Bobot 10%)</span>
+                  <span className="min-w-0 break-words">Modul Inventori & Audit Log Pergerakan Stok (Bobot 10%)</span>
                 </h1>
                 <p className="text-xs text-stone-400">
                   Stok HANYA berkurang saat settlement webhook Midtrans, otomatis restock saat transaksi dibatalkan.
@@ -403,13 +410,13 @@ export default function AdminDashboardPage() {
             )}
 
             {/* Stock List Table */}
-            <div className="bg-stone-950 border border-stone-800 rounded-2xl p-5 space-y-3">
+            <div className="bg-stone-950 border border-stone-800 rounded-2xl p-3 sm:p-5 space-y-3">
               <h3 className="text-xs font-bold uppercase tracking-wider text-stone-300">
                 Manajemen SKU & Kuantitas Stok Real-time di Database
               </h3>
 
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs border-collapse">
+                <table className="w-full min-w-[640px] text-left text-xs border-collapse">
                   <thead>
                     <tr className="border-b border-stone-800 text-stone-400">
                       <th className="py-2 px-3">Produk Kuliner</th>
@@ -452,13 +459,13 @@ export default function AdminDashboardPage() {
             </div>
 
             {/* Audit Log Table */}
-            <div className="bg-stone-950 border border-stone-800 rounded-2xl p-5 space-y-3">
+            <div className="bg-stone-950 border border-stone-800 rounded-2xl p-3 sm:p-5 space-y-3">
               <h3 className="text-xs font-bold uppercase tracking-wider text-stone-300">
                 Log Pergerakan Stok (Audit Log Masuk, Keluar, dan Penyesuaian)
               </h3>
 
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs border-collapse font-mono text-[11px]">
+                <table className="w-full min-w-[720px] text-left text-xs border-collapse font-mono text-[11px]">
                   <thead>
                     <tr className="border-b border-stone-800 text-stone-400">
                       <th className="py-2 px-3">Waktu</th>
@@ -501,9 +508,9 @@ export default function AdminDashboardPage() {
         {activeTab === 'demo' && (
           <div className="space-y-6">
             <div className="pb-3 border-b border-stone-800">
-              <h1 className="text-xl font-bold text-white flex items-center gap-2">
+              <h1 className="text-lg sm:text-xl font-bold text-white flex flex-wrap items-center gap-2">
                 <Flame className="w-5 h-5 text-amber-400" />
-                <span>Live Assessment Scenario Runner (Skenario Demo Ujian)</span>
+                <span className="min-w-0 break-words">Live Assessment Scenario Runner (Skenario Demo Ujian)</span>
               </h1>
               <p className="text-xs text-stone-400">
                 Eksekusi 7 skenario pengujian langsung untuk membuktikan integritas backend & database di depan dosen penguji:
@@ -597,7 +604,7 @@ export default function AdminDashboardPage() {
             </div>
 
             {/* Terminal Console */}
-            <div className="bg-black rounded-2xl p-5 border border-stone-800 font-mono text-xs space-y-2 shadow-inner">
+            <div className="bg-black rounded-2xl p-3 sm:p-5 border border-stone-800 font-mono text-xs space-y-2 shadow-inner">
               <div className="flex justify-between items-center text-stone-400 pb-2 border-b border-stone-800">
                 <div className="flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -617,12 +624,12 @@ export default function AdminDashboardPage() {
                       key={idx}
                       className={
                         log.includes('ANTI-OVERSELLING REJECTED')
-                          ? 'text-red-400 font-bold'
+                        ? 'text-red-400 font-bold break-words'
                           : log.includes('SUCCESS') || log.includes('BERHASIL')
-                          ? 'text-emerald-400 font-bold'
+                          ? 'text-emerald-400 font-bold break-words'
                           : log.includes('ACTION')
-                          ? 'text-indigo-400'
-                          : 'text-stone-300'
+                          ? 'text-indigo-400 break-words'
+                          : 'text-stone-300 break-words'
                       }
                     >
                       {log}
@@ -638,7 +645,7 @@ export default function AdminDashboardPage() {
 
       {/* Floating Toast */}
       {toast && (
-        <div className="fixed bottom-6 right-6 z-50 bg-stone-800 text-white text-xs px-4 py-3 rounded-2xl shadow-xl flex items-center gap-2 border border-stone-700">
+        <div className="fixed bottom-4 left-4 right-4 sm:bottom-6 sm:left-auto sm:right-6 z-50 max-w-lg bg-stone-800 text-white text-xs px-4 py-3 rounded-2xl shadow-xl flex items-start gap-2 border border-stone-700">
           <span>{toast.icon}</span>
           <span>{toast.msg}</span>
         </div>

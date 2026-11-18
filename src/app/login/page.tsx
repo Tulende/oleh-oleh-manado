@@ -108,7 +108,7 @@ export default function LoginPage() {
         <section className="overflow-hidden rounded-3xl border border-stone-200 bg-white shadow-xl shadow-stone-900/5">
           
           {/* Brand header */}
-          <div className="bg-gradient-to-br from-stone-900 via-stone-800 to-orange-950 px-7 py-7 text-white">
+          <div className="bg-gradient-to-br from-stone-900 via-stone-800 to-orange-950 px-5 py-6 sm:px-7 sm:py-7 text-white">
             <div className="mb-4 flex items-center gap-3">
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-tr from-orange-600 to-amber-500 text-white font-black text-xl shadow-md">
                 S
@@ -133,7 +133,7 @@ export default function LoginPage() {
             </p>
           </div>
 
-          <div className="p-7">
+          <div className="p-5 sm:p-7">
             {/* Mode Switcher Tabs */}
             <div className="mb-6 grid grid-cols-2 rounded-xl bg-stone-100 p-1" aria-label="Mode Masuk atau Daftar">
               <button
