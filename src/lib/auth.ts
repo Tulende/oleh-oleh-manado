@@ -1,4 +1,5 @@
-const PASSWORD_ITERATIONS = 120_000;
+// Cloudflare Workers Web Crypto rejects PBKDF2 counts above 100,000.
+const PASSWORD_ITERATIONS = 100_000;
 const SESSION_COOKIE = 'sentra_session';
 const SESSION_TTL_SECONDS = 60 * 60 * 24 * 7;
 const encoder = new TextEncoder();
