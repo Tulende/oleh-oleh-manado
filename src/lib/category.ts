@@ -19,6 +19,11 @@ export function checkCategoryMatch(productCategory?: string | null, selected?: s
     return false;
   }
 
+  // Exact case-insensitive trimmed match
+  if (productCategory.trim().toLowerCase() === selected.trim().toLowerCase()) {
+    return true;
+  }
+
   const normProduct = normalizeCategory(productCategory);
   const normSelected = normalizeCategory(selected);
 

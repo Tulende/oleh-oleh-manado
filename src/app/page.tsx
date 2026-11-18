@@ -59,6 +59,11 @@ function checkCategoryMatch(productCategory?: string | null, selected?: string |
     return false;
   }
 
+  // Exact case-insensitive trimmed match
+  if (productCategory.trim().toLowerCase() === selected.trim().toLowerCase()) {
+    return true;
+  }
+
   const normProduct = normalizeCategory(productCategory);
   const normSelected = normalizeCategory(selected);
 
@@ -565,9 +570,21 @@ export default function StorefrontPage() {
               Katalog gagal dimuat: {catalogError}
             </p>
           ) : filteredProducts.length === 0 ? (
-            <p className="col-span-full rounded-xl border border-stone-200 bg-white p-4 text-sm text-stone-600">
-              Belum ada produk yang cocok. Coba ubah pencarian atau kategori.
-            </p>
+            <div className="col-span-full py-16 px-4 flex flex-col items-center justify-center text-center bg-white rounded-3xl border border-dashed border-stone-200 my-4">
+              <div className="w-16 h-16 rounded-2xl bg-stone-100 flex items-center justify-center text-3xl mb-3">
+                📦
+              </div>
+              <h3 className="text-base font-bold text-stone-800">
+                {selectedCategory !== 'Semua'
+                  ? `Belum ada produk di kategori "${selectedCategory}"`
+                  : 'Belum ada produk tersedia'}
+              </h3>
+              <p className="text-xs text-stone-500 mt-1 max-w-sm leading-relaxed">
+                {selectedCategory !== 'Semua'
+                  ? 'Produk untuk kategori ini belum tersedia atau sedang disiapkan.'
+                  : 'Produk sedang disiapkan. Silakan cek kembali nanti.'}
+              </p>
+            </div>
           ) : null}
           {filteredProducts.map((p) => {
             const isLowStock = p.stock <= p.minStockThreshold;
