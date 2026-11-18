@@ -6,13 +6,20 @@ export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
   const isAdminLogin = pathname === '/admin/login';
-  const isAdminPage = pathname.startsWith('/admin') && !isAdminLogin;
+  const isAdminRegistration = pathname === '/admin/register';
+  const isAdminPage = pathname.startsWith('/admin') && !isAdminLogin && !isAdminRegistration;
 
   // Protect /admin routes from unauthenticated or non-admin users
   if (isAdminPage && user?.role !== 'ADMIN') {
     const loginUrl = new URL('/admin/login', request.url);
     loginUrl.searchParams.set('next', pathname);
     return NextResponse.redirect(loginUrl);
+  }
+
+  // Keep the first-admin bootstrap route public; the API itself requires
+  // the bootstrap token and refuses to run once an admin already exists.
+  if (isAdminRegistration && user?.role === 'ADMIN') {
+    return NextResponse.redirect(new URL('/admin', request.url));
   }
 
   // If already logged in as ADMIN, skip admin login and go to /admin
