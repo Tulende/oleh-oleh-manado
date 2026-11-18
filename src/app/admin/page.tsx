@@ -149,6 +149,7 @@ export default function AdminDashboardPage() {
                 <span className="hidden md:inline text-[10px] bg-stone-800 text-stone-300 px-2 py-0.5 rounded font-mono whitespace-nowrap">
                   Command Center UMKM
                 </span>
+              </div>
             </div>
 
             <button
