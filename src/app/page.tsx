@@ -476,43 +476,35 @@ export default function StorefrontPage() {
 
       {/* 4. CATEGORY SELECTOR & FILTER */}
       <section id="katalog" className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-8 sm:pt-10 pb-4">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-stone-200">
-          <div>
-            <h2 className="text-xl sm:text-2xl font-black tracking-tight text-stone-900">
-              Katalog Kuliner & Oleh-Oleh Khas Sulut
-            </h2>
-            <p className="text-xs text-stone-500 mt-1">
-              Diproduksi higienis langsung oleh pengrajin UMKM Manado, Bitung, Minahasa, dan Tomohon.
-            </p>
-            <div className="relative mt-4 md:hidden">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(event) => setSearchQuery(event.target.value)}
-                placeholder="Cari produk oleh-oleh..."
-                aria-label="Cari produk"
-                className="w-full text-sm pl-10 pr-4 py-3 rounded-xl border border-stone-200 bg-white focus:outline-none focus:border-orange-500 shadow-xs"
-              />
-              <Search className="w-4 h-4 text-stone-400 absolute left-3.5 top-3.5" />
-            </div>
-          </div>
+        {/* Mobile Search Bar */}
+        <div className="relative mb-6 max-w-md mx-auto md:hidden">
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(event) => setSearchQuery(event.target.value)}
+            placeholder="Cari produk oleh-oleh..."
+            aria-label="Cari produk"
+            className="w-full text-sm pl-10 pr-4 py-3 rounded-xl border border-stone-200 bg-white focus:outline-none focus:border-orange-500 shadow-xs"
+          />
+          <Search className="w-4 h-4 text-stone-400 absolute left-3.5 top-3.5" />
+        </div>
 
-          {/* Category Chips */}
-          <div className="flex flex-wrap gap-1.5">
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setSelectedCategory(cat)}
-                className={`text-xs px-4 py-2 rounded-full font-medium transition-all ${
-                  selectedCategory === cat
-                    ? 'bg-orange-600 text-white shadow-sm'
-                    : 'bg-white text-stone-700 border border-stone-200 hover:border-orange-300'
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
-          </div>
+        {/* Category Chips */}
+        <div className="flex flex-wrap items-center justify-center gap-3 md:gap-4 my-6">
+          {categories.map((cat) => (
+            <button
+              key={cat}
+              type="button"
+              onClick={() => setSelectedCategory(cat)}
+              className={`px-6 py-3 md:px-7 md:py-3.5 text-base font-semibold rounded-full transition-all duration-200 ${
+                selectedCategory === cat
+                  ? 'bg-orange-600 text-white shadow-md'
+                  : 'bg-white border border-gray-300 text-gray-700 hover:border-orange-500 hover:text-orange-600'
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
         </div>
 
         {/* 5. PRODUCT GRID */}
