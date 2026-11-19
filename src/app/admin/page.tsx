@@ -646,33 +646,33 @@ export default function AdminDashboardPage() {
               <div className="bg-stone-950 border border-stone-800 rounded-2xl p-4 space-y-1">
                 <span className="text-[11px] text-stone-400 font-medium">Total Pelanggan Terdaftar</span>
                 <div className="text-2xl font-black text-white">
-                  {crmData?.crm?.metrics?.totalCustomers || 0} User
+                  {crmData ? (crmData.crm?.metrics?.totalCustomers ?? 0) : loading ? '…' : 0} User
                 </div>
-                <span className="text-[10px] text-emerald-400 font-medium">100% data profil lengkap</span>
+                <span className="text-[10px] text-stone-400 font-medium">Akun dengan role CUSTOMER</span>
               </div>
 
               <div className="bg-stone-950 border border-stone-800 rounded-2xl p-4 space-y-1">
                 <span className="text-[11px] text-stone-400 font-medium">Repeat Purchase Rate (%)</span>
                 <div className="text-2xl font-black text-orange-500">
-                  {crmData?.crm?.metrics?.repeatPurchaseRatePercent || 0}%
+                  {crmData ? (crmData.crm?.metrics?.repeatPurchaseRatePercent ?? 0) : loading ? '…' : 0}%
                 </div>
                 <span className="text-[10px] text-stone-400">
-                  {crmData?.crm?.metrics?.repeatBuyersCount || 0} dari {crmData?.crm?.metrics?.activeBuyersCount || 0} order &gt; 1x
+                  {crmData?.crm?.metrics?.repeatBuyersCount ?? 0} dari {crmData?.crm?.metrics?.activeBuyersCount ?? 0} pelanggan yang pernah bertransaksi
                 </span>
               </div>
 
               <div className="bg-stone-950 border border-stone-800 rounded-2xl p-4 space-y-1">
                 <span className="text-[11px] text-stone-400 font-medium">Average Order Value (AOV)</span>
                 <div className="text-2xl font-black text-white">
-                  Rp {(crmData?.crm?.metrics?.averageOrderValue || 0).toLocaleString('id-ID')}
+                  Rp {(crmData?.crm?.metrics?.averageOrderValue ?? 0).toLocaleString('id-ID')}
                 </div>
-                <span className="text-[10px] text-emerald-400 font-medium">Dari transaksi histori</span>
+                <span className="text-[10px] text-stone-400 font-medium">Dari {crmData?.crm?.metrics?.totalOrdersCount ?? 0} transaksi lunas</span>
               </div>
 
               <div className="bg-stone-950 border border-stone-800 rounded-2xl p-4 space-y-1">
                 <span className="text-[11px] text-stone-400 font-medium">Total Omzet Penjualan</span>
                 <div className="text-2xl font-black text-emerald-400">
-                  Rp {(crmData?.crm?.metrics?.totalRevenue || 0).toLocaleString('id-ID')}
+                  Rp {(crmData?.crm?.metrics?.totalRevenue ?? 0).toLocaleString('id-ID')}
                 </div>
                 <span className="text-[10px] text-stone-400">Settlement Midtrans</span>
               </div>
@@ -684,7 +684,7 @@ export default function AdminDashboardPage() {
                 <div className="flex justify-between items-center">
                   <span className="text-xs font-bold text-blue-300">Pelanggan Baru (NEW)</span>
                   <span className="text-xs font-black bg-blue-900 text-blue-200 px-2 py-0.5 rounded-full">
-                    {crmData?.crm?.segmentDistribution?.NEW_CUSTOMER || 0} Pelanggan
+                    {crmData?.crm?.segmentDistribution?.NEW_CUSTOMER ?? 0} Pelanggan
                   </span>
                 </div>
                 <p className="text-[11px] text-stone-400">
@@ -696,7 +696,7 @@ export default function AdminDashboardPage() {
                 <div className="flex justify-between items-center">
                   <span className="text-xs font-bold text-emerald-300">Pelanggan Loyal (LOYAL)</span>
                   <span className="text-xs font-black bg-emerald-900 text-emerald-200 px-2 py-0.5 rounded-full">
-                    {crmData?.crm?.segmentDistribution?.LOYAL || 0} Pelanggan
+                    {crmData?.crm?.segmentDistribution?.LOYAL ?? 0} Pelanggan
                   </span>
                 </div>
                 <p className="text-[11px] text-stone-400">
@@ -708,7 +708,7 @@ export default function AdminDashboardPage() {
                 <div className="flex justify-between items-center">
                   <span className="text-xs font-bold text-rose-300">Tidak Aktif (CHURN RISK)</span>
                   <span className="text-xs font-black bg-rose-900 text-rose-200 px-2 py-0.5 rounded-full">
-                    {crmData?.crm?.segmentDistribution?.CHURN_RISK || 0} Pelanggan
+                    {crmData?.crm?.segmentDistribution?.CHURN_RISK ?? 0} Pelanggan
                   </span>
                 </div>
                 <p className="text-[11px] text-stone-400">

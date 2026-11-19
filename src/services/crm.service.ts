@@ -1,6 +1,30 @@
 import prisma from '@/lib/prisma';
 
 export class CrmService {
+  private static getSegment(params: {
+    createdAt: Date;
+    orderCount: number;
+    totalSpent: number;
+    lastOrderAt: Date | null;
+    now?: Date;
+  }) {
+    const now = params.now ?? new Date();
+    const newCustomerCutoff = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    const churnCutoff = new Date(now.getTime() - 45 * 24 * 60 * 60 * 1000);
+    const recentlyRegistered = params.createdAt >= newCustomerCutoff;
+    const hasRecentOrder = params.lastOrderAt !== null && params.lastOrderAt > churnCutoff;
+
+    // Prioritaskan pelanggan dormant dan loyal, lalu pendaftaran/pembelian baru,
+    // agar satu pelanggan hanya masuk ke satu segmen.
+    if (params.orderCount > 0 && !hasRecentOrder) return 'CHURN_RISK';
+    if (params.orderCount >= 3 && params.totalSpent >= 500000) return 'LOYAL';
+    if (recentlyRegistered) return 'NEW_CUSTOMER';
+    if (params.orderCount === 1) return 'NEW_CUSTOMER';
+    if (params.orderCount === 0) return 'CHURN_RISK';
+    if (params.orderCount >= 2) return 'POTENTIAL_LOYAL';
+    return 'CHURN_RISK';
+  }
+
   /**
    * 1. REKALKULASI SEGMEN CRM SATU PELANGGAN
    * Dipanggil otomatis setiap kali order berhasil terkonfirmasi 'settlement'.
@@ -21,30 +45,16 @@ export class CrmService {
     const settledOrders = user.orders;
     const orderCount = settledOrders.length;
     const totalSpent = settledOrders.reduce((sum, o) => sum + o.grandTotal, 0);
-    const lastOrder = settledOrders[0];
-    const lastOrderAt = lastOrder?.paidAt || null;
-
-    const now = new Date();
-    const daysSinceLastOrder = lastOrderAt
-      ? Math.floor((now.getTime() - new Date(lastOrderAt).getTime()) / (1000 * 60 * 60 * 24))
-      : 999;
-
-    let segment = 'NEW_CUSTOMER';
-
-    // Algoritma Segmentasi Berdasarkan RFM (Recency, Frequency, Monetary)
-    if (orderCount === 0) {
-      segment = 'NEW_CUSTOMER';
-    } else if (daysSinceLastOrder >= 45) {
-      // Pelanggan Tidak Aktif / Risiko Churn jika tidak ada transaksi baru > 45 hari
-      segment = 'CHURN_RISK';
-    } else if (orderCount >= 3 && totalSpent >= 500000) {
-      // Pelanggan Loyal jika repeat order minimal 3 kali & belanja >= 500k
-      segment = 'LOYAL';
-    } else if (orderCount >= 2) {
-      segment = 'POTENTIAL_LOYAL';
-    } else {
-      segment = 'NEW_CUSTOMER';
-    }
+    const lastOrderAt = settledOrders.reduce<Date | null>((latest, order) => {
+      const orderDate = order.paidAt ?? order.createdAt;
+      return !latest || orderDate > latest ? orderDate : latest;
+    }, null);
+    const segment = this.getSegment({
+      createdAt: user.createdAt,
+      orderCount,
+      totalSpent,
+      lastOrderAt,
+    });
 
     const updatedUser = await prisma.user.update({
       where: { id: userId },
@@ -80,51 +90,65 @@ export class CrmService {
   static async getCrmDashboardMetrics() {
     const customers = await prisma.user.findMany({
       where: { role: 'CUSTOMER' },
-      orderBy: { totalSpent: 'desc' },
+      select: { id: true, email: true, name: true, createdAt: true },
     });
-
     const totalCustomers = customers.length;
 
-    // Pelanggan yang pernah melakukan transaksi
-    const activeBuyers = customers.filter((c) => c.orderCount >= 1);
-    const repeatBuyers = customers.filter((c) => c.orderCount > 1);
-
-    // Repeat Purchase Rate (%) = (Pembeli berulang / Total pembeli aktif) * 100
-    const repeatPurchaseRate =
-      activeBuyers.length > 0 ? ((repeatBuyers.length / activeBuyers.length) * 100).toFixed(1) : '0.0';
-
-    // Total Pesanan Sukses & Omzet
+    // Ambil transaksi settlement langsung dari D1, bukan kolom ringkasan User
+    // yang hanya diperbarui ketika webhook pembayaran berjalan.
     const settledOrders = await prisma.order.findMany({
       where: { status: 'SETTLEMENT' },
-      select: { grandTotal: true },
+      select: { userId: true, grandTotal: true, paidAt: true, createdAt: true },
     });
 
-    const totalRevenue = settledOrders.reduce((sum, o) => sum + o.grandTotal, 0);
-    const totalOrdersCount = settledOrders.length;
+    const customerStats = new Map<string, { orderCount: number; totalSpent: number; lastOrderAt: Date | null }>();
+    for (const order of settledOrders) {
+      const stats = customerStats.get(order.userId) ?? { orderCount: 0, totalSpent: 0, lastOrderAt: null };
+      const orderDate = order.paidAt ?? order.createdAt;
+      stats.orderCount += 1;
+      stats.totalSpent += order.grandTotal;
+      if (!stats.lastOrderAt || orderDate > stats.lastOrderAt) stats.lastOrderAt = orderDate;
+      customerStats.set(order.userId, stats);
+    }
 
-    // Average Order Value (AOV) = Total Pendapatan / Total Transaksi Sukses
+    const totalRevenue = settledOrders.reduce((sum, order) => sum + order.grandTotal, 0);
+    const totalOrdersCount = settledOrders.length;
+    const activeBuyersCount = [...customerStats.values()].filter((stats) => stats.orderCount > 0).length;
+    const repeatBuyersCount = [...customerStats.values()].filter((stats) => stats.orderCount > 1).length;
+    const repeatPurchaseRate = activeBuyersCount > 0 ? (repeatBuyersCount / activeBuyersCount) * 100 : 0;
+
     const aov = totalOrdersCount > 0 ? Math.round(totalRevenue / totalOrdersCount) : 0;
 
-    // Distribusi Segmen Pelanggan
-    const segmentDistribution = {
-      NEW_CUSTOMER: customers.filter((c) => c.crmSegment === 'NEW_CUSTOMER').length,
-      LOYAL: customers.filter((c) => c.crmSegment === 'LOYAL').length,
-      CHURN_RISK: customers.filter((c) => c.crmSegment === 'CHURN_RISK').length,
-      POTENTIAL_LOYAL: customers.filter((c) => c.crmSegment === 'POTENTIAL_LOYAL').length,
-    };
+    const enrichedCustomers = customers.map((customer) => {
+      const stats = customerStats.get(customer.id) ?? { orderCount: 0, totalSpent: 0, lastOrderAt: null };
+      return {
+        ...customer,
+        orderCount: stats.orderCount,
+        totalSpent: stats.totalSpent,
+        lastOrderAt: stats.lastOrderAt,
+        crmSegment: this.getSegment({ createdAt: customer.createdAt, ...stats }),
+      };
+    });
+    const segmentDistribution = enrichedCustomers.reduce(
+      (distribution, customer) => {
+        distribution[customer.crmSegment] = (distribution[customer.crmSegment] ?? 0) + 1;
+        return distribution;
+      },
+      { NEW_CUSTOMER: 0, LOYAL: 0, CHURN_RISK: 0, POTENTIAL_LOYAL: 0 } as Record<string, number>
+    );
 
     return {
       metrics: {
         totalCustomers,
-        activeBuyersCount: activeBuyers.length,
-        repeatBuyersCount: repeatBuyers.length,
-        repeatPurchaseRatePercent: parseFloat(repeatPurchaseRate),
+        activeBuyersCount,
+        repeatBuyersCount,
+        repeatPurchaseRatePercent: Number(repeatPurchaseRate.toFixed(1)),
         averageOrderValue: aov,
         totalRevenue,
         totalOrdersCount,
       },
       segmentDistribution,
-      topCustomers: customers.slice(0, 10),
+      topCustomers: enrichedCustomers.sort((a, b) => b.totalSpent - a.totalSpent).slice(0, 10),
     };
   }
 
